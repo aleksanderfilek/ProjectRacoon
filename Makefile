@@ -33,8 +33,8 @@ buildDebug:
 	$(MKDIR) build\debug\$(OS)\assets
 	$(COPY) assets build\debug\$(OS)\assets
 	$(COPY) $(LIBDIR) build\debug\$(OS)
-	$(CC) $(INC) -DDEBUG -c $(SOURCES)
-	$(CC) $(INC) -DDEBUG -o build\debug\$(OS)\$(TARGET) $(OBJECTS) $(LIBS)
+	$(CC) $(INC) -D DEBUG -c $(SOURCES)
+	$(CC) $(INC) -D DEBUG -o build\debug\$(OS)\$(TARGET) $(OBJECTS) $(LIBS)
 
 buildRelease:
 	$(MKDIR) build\release\$(OS)\assets
