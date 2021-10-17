@@ -5,14 +5,38 @@
 
 #include"Game\ui.h"
 
+#include<stdint.h>
+
+typedef enum
+{
+  MENUSTATE_MAIN = 0,
+  MENUSTATE_LEVELS = 1,
+  MENUSTATE_COUNT = 2
+} MenuState;
 
 typedef struct
 {
-  HeroSpriteBatch* spriteBatch;
-  HeroTexture** textures;
-  HeroShader* shader;
   UIButton** buttons;
+  uint32_t buttonsNumber;
+} MenuUIState;
+
+
+typedef struct
+{
   SDL_Window* sdlWindow;
+  HeroInput* input;
+
+  HeroSpriteBatch* spriteBatch;
+
+  // assets
+  HeroTexture** textures;
+  uint32_t texturesNumber;
+  HeroShader* shader;
+
+  MenuState uiState;
+  MenuUIState* uiCurrentState;
+  MenuUIState uiStates[2];
+
 } GameMenu;
 
 GameMenu* gameMenuInit();

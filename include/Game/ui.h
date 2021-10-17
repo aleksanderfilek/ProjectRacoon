@@ -19,5 +19,8 @@ UIButton* uiButtonCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size)
 void uiButtonUpdate(UIButton** buttons, uint32_t number, int mouseX, int mouseY);
 void uiButtonDraw(HeroSpriteBatch* spriteBatch, UIButton** buttons, uint32_t number);
 void uiButtonDestory(UIButton* button);
+// click function
+// states
+// set state rect normal, hover, click
 
 #endif
