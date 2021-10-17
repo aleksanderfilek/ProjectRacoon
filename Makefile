@@ -47,7 +47,7 @@ buildRelease:
 	$(COPY) assets build\release\$(OS)\assets
 	$(COPY) $(LIBDIR) build\release\$(OS)
 	$(CC) $(INC) -O3 -c $(SOURCES)
-	$(CC) $(INC) -O3 -o build\release\$(OS)\$(TARGET) $(OBJECTS) $(LIBS)
+	$(CC) $(INC) -O3 -mwindows -o build\release\$(OS)\$(TARGET) $(OBJECTS) $(LIBS)
 
 clearDebug:
 	$(IFEXIST) build\debug\$(OS) $(RMDIR) build\debug\$(OS)
