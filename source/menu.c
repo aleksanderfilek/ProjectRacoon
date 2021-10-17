@@ -8,6 +8,11 @@ extern HeroCore* core;
 static void update(GameMenu* menu);
 static void draw(GameMenu* menu);
 static void changeState(GameMenu* menu, MenuState state);
+static void playClick();
+static void quitClick();
+static void backToMenuClick();
+static UIWidget* widgetConstructMainMenu(GameMenu* menu);
+static UIWidget* widgetConstructPlayMenu(GameMenu* menu);
 
 GameMenu* gameMenuInit()
 {
@@ -21,15 +26,14 @@ GameMenu* gameMenuInit()
 
   menu->spriteBatch = heroSpriteBatchInit(window, 10, 10, menu->shader);
   
-  menu->texturesNumber = 2;
+  menu->texturesNumber = 3;
   menu->textures = (HeroTexture**)malloc(menu->texturesNumber * sizeof(HeroTexture*));
   menu->textures[0] = heroTextureLoad("assets\\sprites\\playBtn.png", 0);
   menu->textures[1] = heroTextureLoad("assets\\sprites\\quitBtn.png", 0);
+  menu->textures[2] = heroTextureLoad("assets\\sprites\\backBtn.png", 0);
 
-  menu->uiStates[0].buttonsNumber = 2;
-  menu->uiStates[0].buttons = (UIButton**)malloc(menu->uiStates[0].buttonsNumber * sizeof(UIButton*));
-  menu->uiStates[0].buttons[0] = uiButtonCreate(menu->textures[0], (HeroInt2){50,50},(HeroInt2){386,64});
-  menu->uiStates[0].buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){50,150},(HeroInt2){386,64});
+  menu->widgets[0] = widgetConstructMainMenu(menu);
+  menu->widgets[1] = widgetConstructPlayMenu(menu);
 
   changeState(menu, MENUSTATE_MAIN);
 
@@ -56,41 +60,32 @@ void gameMenuDestroy(void* ptr)
     heroTextureUnload(menu->textures[0]);
   }
 
-  for(int i=0; i < menu->buttonsNumber; i++)
+  for(int i=0; i < 2; i++)
   {
-    uiButtonDestory(menu->buttons[0]);
+    uiWidgetDestroy(menu->widgets[i]);
   }
 
   heroShaderUnload(menu->shader);
 
   heroSpriteBatchDestroy(menu->spriteBatch);
   
-  free(menu->buttons);
   free(menu->textures);
   free(menu);
 }
 
 static void update(GameMenu* menu)
 {
-  int mouseX, mouseY;
-  heroInputGetMousePosition(menu->input, &mouseX, &mouseY);
-  uiButtonUpdate(menu->buttons, menu->buttonsNumber, mouseX, mouseY);
-  if(menu->buttons[0]->isHovering == true && heroInputMouseButtonDown(menu->input, HERO_MOUSE_LEFT) == true)
-  {
-    printf("play\n");
-  }
-  if(menu->buttons[1]->isHovering == true && heroInputMouseButtonDown(menu->input, HERO_MOUSE_LEFT) == true)
-  {
-    heroCoreClose(core);
-  }
+  uiWidgetUpdate(menu->currentWidget, menu->input);
+
 }
 
 static void draw(GameMenu* menu)
 {
   glClear(GL_COLOR_BUFFER_BIT);
 
+
   heroSpriteBatchBegin(menu->spriteBatch);
-  uiButtonDraw(menu->spriteBatch, menu->buttons, menu->buttonsNumber);
+  uiWidgetDraw(menu->currentWidget, menu->spriteBatch);
   heroSpriteBatchEnd(menu->spriteBatch);
   
   SDL_GL_SwapWindow(menu->sdlWindow);
@@ -99,5 +94,46 @@ static void draw(GameMenu* menu)
 static void changeState(GameMenu* menu, MenuState state)
 {
   menu->uiState = state;
-  menu->uiCurrentState =  menu->uiStates[(int)state];
+  menu->currentWidget =  menu->widgets[(int)state];
+}
+
+static void playClick(void* arg)
+{
+  changeState((GameMenu*)arg, MENUSTATE_LEVELS);
+}
+
+static void quitClick(void* arg)
+{
+  heroCoreClose((HeroCore*)arg);
+}
+
+static void backToMenuClick(void* arg)
+{
+  changeState((GameMenu*)arg, MENUSTATE_MAIN);
+}
+
+static UIWidget* widgetConstructMainMenu(GameMenu* menu)
+{
+  UIWidget* widget = uiWidgetCreate();
+
+  widget->buttonNumber = 2;
+  widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
+  widget->buttons[0] = uiButtonCreate(menu->textures[0], (HeroInt2){50,50},(HeroInt2){386,64});
+  uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
+  widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){50,150},(HeroInt2){386,64});
+  uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
+
+  return widget;
+}
+
+static UIWidget* widgetConstructPlayMenu(GameMenu* menu)
+{
+  UIWidget* widget = uiWidgetCreate();
+
+  widget->buttonNumber = 1;
+  widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
+  widget->buttons[0] = uiButtonCreate(menu->textures[2], (HeroInt2){50,50},(HeroInt2){386,64});
+  uiButtonSetClickFunc(widget->buttons[0], backToMenuClick, menu);
+
+  return widget;
 }

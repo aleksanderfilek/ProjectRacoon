@@ -7,20 +7,41 @@
 #include<stdint.h>
 #include<stdbool.h>
 
+typedef enum
+{
+  UIBUTTONSTATE_NORMAL = 0,
+  UIBUTTONSTATE_HOVER = 1,
+  UIBUTTONSTATE_CLICK = 2,
+  UIBUTTONSTATE_COUNT = 3
+} UIButtonState;
+
 typedef struct
 {
   HeroTexture* texture;
   HeroInt2 position;
   HeroInt2 size;
-  bool isHovering;
+  UIButtonState state;
+  HeroInt4 rect[UIBUTTONSTATE_COUNT];
+  void (*click)(void*);
+  void* arg;
 } UIButton;
 
 UIButton* uiButtonCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size);
-void uiButtonUpdate(UIButton** buttons, uint32_t number, int mouseX, int mouseY);
+void uiButtonSetStateRect(UIButton* button, UIButtonState state, HeroInt4 rect);
+void uiButtonSetClickFunc(UIButton* button, void (*click)(void*), void* arg);
+void uiButtonUpdate(UIButton** buttons, uint32_t number, HeroInput* input);
 void uiButtonDraw(HeroSpriteBatch* spriteBatch, UIButton** buttons, uint32_t number);
 void uiButtonDestory(UIButton* button);
-// click function
-// states
-// set state rect normal, hover, click
+
+typedef struct
+{
+  UIButton** buttons;
+  uint32_t buttonNumber;
+} UIWidget;
+
+UIWidget* uiWidgetCreate();
+void uiWidgetUpdate(UIWidget* widget, HeroInput* input);
+void uiWidgetDraw(UIWidget* widget, HeroSpriteBatch* spriteBatch);
+void uiWidgetDestroy(UIWidget* widget);
 
 #endif

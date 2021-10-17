@@ -16,13 +16,6 @@ typedef enum
 
 typedef struct
 {
-  UIButton** buttons;
-  uint32_t buttonsNumber;
-} MenuUIState;
-
-
-typedef struct
-{
   SDL_Window* sdlWindow;
   HeroInput* input;
 
@@ -34,8 +27,8 @@ typedef struct
   HeroShader* shader;
 
   MenuState uiState;
-  MenuUIState* uiCurrentState;
-  MenuUIState uiStates[2];
+  UIWidget* currentWidget;
+  UIWidget* widgets[2];
 
 } GameMenu;
 
