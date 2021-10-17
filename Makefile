@@ -17,6 +17,7 @@ ifeq ($(OS),Windows_NT)
 	IFEXIST = if exist
 	LIBDIR = lib\windows
 	LIBS = -Llib\windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
+	EXTENSION = .exe
 else
 	RM = rm -rf
 	RMDIR = rm -rf
@@ -24,10 +25,15 @@ else
 	IFEXIST = 
 	LIBDIR = lib\linux
 	LIBS = -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
+	EXTENSION
 endif
 
 debug: clearDebug buildDebug clean
 release: clearRelease buildRelease clean
+runDebug: 
+	build\debug\$(OS)\$(TARGET)$(EXTENSION)
+runRelease: 
+	build\release\$(OS)\$(TARGET)$(EXTENSION)
 
 buildDebug:
 	$(MKDIR) build\debug\$(OS)\assets
