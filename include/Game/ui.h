@@ -3,7 +3,6 @@
 
 #include"Hero\Hero.h"
 
-
 #include<stdint.h>
 #include<stdbool.h>
 
@@ -32,6 +31,19 @@ void uiButtonSetClickFunc(UIButton* button, void (*click)(void*), void* arg);
 void uiButtonUpdate(UIButton** buttons, uint32_t number, HeroInput* input);
 void uiButtonDraw(HeroSpriteBatch* spriteBatch, UIButton** buttons, uint32_t number);
 void uiButtonDestory(UIButton* button);
+
+typedef struct
+{
+  HeroTexture* texture;
+  HeroInt2 position;
+  HeroInt2 size;
+  HeroInt4 rect;
+} UIImage;
+
+UIImage* uiImageCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size);
+void uiImageSetRect(UIImage* image, HeroInt4 rect);
+void uiImageDraw(UIImage** images, uint32_t number, HeroSpriteBatch* spriteBatch);
+void uiImageDestroy(UIImage* image);
 
 typedef struct
 {

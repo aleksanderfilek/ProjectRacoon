@@ -64,7 +64,6 @@ void uiButtonDraw(HeroSpriteBatch* spriteBatch, UIButton** buttons, uint32_t num
   for(int i = 0; i < number; i++)
   {
     UIButton* button = buttons[i];
-    heroSpriteBatchDrawTexture(spriteBatch, button->texture, button->position, button->size);
     heroSpriteBatchDrawTextureEx(spriteBatch, button->texture, button->position, button->size, button->rect[button->state], 0.0f, color);
   }
 }
@@ -72,6 +71,39 @@ void uiButtonDraw(HeroSpriteBatch* spriteBatch, UIButton** buttons, uint32_t num
 void uiButtonDestory(UIButton* button)
 {
   free(button);
+}
+
+UIImage* uiImageCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size)
+{
+  UIImage* image = (UIImage*)malloc(sizeof(UIImage));
+
+  image->texture = texture;
+  image->position = position;
+  image->size = size;
+  image->rect = (HeroInt4){0,0,size.x,size.y};
+
+  return image;
+}
+
+void uiImageSetRect(UIImage* image, HeroInt4 rect)
+{
+  image->rect = rect;
+}
+
+void uiImageDraw(UIImage** images, uint32_t number, HeroSpriteBatch* spriteBatch)
+{
+  HeroColor color = {255,255,255,255};
+
+  for(int i = 0; i < number; i++)
+  {
+    UIImage* image = images[i];
+    heroSpriteBatchDrawTextureEx(spriteBatch, image->texture, image->position, image->size, image->rect, 0.0f, color);
+  }
+}
+
+void uiImageDestroy(UIImage* image)
+{
+  free(image);
 }
 
 UIWidget* uiWidgetCreate()
