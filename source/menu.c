@@ -37,8 +37,11 @@ GameMenu* gameMenuInit()
 
   changeState(menu, MENUSTATE_MAIN);
 
-  glClearColor(0.0f,1.0f,1.0f,1.0f);
-  
+  glClearColor(1.0f,1.0f,1.0f,1.0f);
+
+  glEnable( GL_BLEND );
+  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
   return menu;
 }
 
@@ -122,6 +125,13 @@ static UIWidget* widgetConstructMainMenu(GameMenu* menu)
   uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
   widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){50,150},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
+  widget->labelNumber = 1;
+  widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
+  
+  HeroFont* font = heroFontLoad("assets\\fonts\\arial.ttf", 32);
+  widget->labels[0] = uiLabelCreate("Hello, World!", font, (HeroColor){0,0,0,0},
+                                    UIALLIGMENT_TOPLEFT, (HeroInt2){50,300},(HeroInt2){200,64});
+  heroFontUnload(font);
 
   return widget;
 }

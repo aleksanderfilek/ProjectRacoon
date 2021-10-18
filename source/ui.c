@@ -3,6 +3,9 @@
 #include<stdlib.h>
 #include<string.h>
 
+#define Min(a,b) (a<b)?a:b;
+#define Max(a,b) (a>b)?a:b;
+
 UIButton* uiButtonCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size)
 {
   UIButton* button = (UIButton*)malloc(sizeof(UIButton));
@@ -106,6 +109,70 @@ void uiImageDestroy(UIImage* image)
   free(image);
 }
 
+#include<stdio.h>
+
+UILabel* uiLabelCreate(const char* text, HeroFont* font, HeroColor color, UIAlligment alligment, HeroInt2 position, HeroInt2 size)
+{
+  UILabel* label = (UILabel*)malloc(sizeof(UILabel));
+
+  label->texture = heroTextureFromText(text, &color, font, 0);
+  HeroInt2 textureSize = heroTextureGetSize(label->texture);
+
+  switch(alligment)
+  {
+    case UIALLIGMENT_TOPLEFT:
+      label->position = position;
+      label->size.x = Min(textureSize.x, size.x);
+      label->size.y = Min(textureSize.y, size.y);
+    break;
+    case UIALLIGMENT_TOP:
+
+    break;
+    case UIALLIGMENT_TOPRIGHT:
+
+    break;
+    case UIALLIGMENT_LEFT:
+
+    break;
+    case UIALLIGMENT_CENTER:
+
+    break;
+    case UIALLIGMENT_RIGHT:
+
+    break;
+    case UIALLIGMENT_BOTTOMLEFT:
+
+    break;
+    case UIALLIGMENT_BOTTOM:
+
+    break;
+    case UIALLIGMENT_BOTTOMRIGHT:
+
+    break;
+  }
+
+  label->rect = (HeroInt4){0,0,label->size.x,label->size.y};
+
+  return label;
+}
+
+void uiLabelDraw(UILabel** labels, uint32_t number, HeroSpriteBatch* spriteBatch)
+{
+  HeroColor color = {255,255,255,255};
+
+  for(int i = 0; i < number; i++)
+  {
+    UILabel* label = labels[i];
+    heroSpriteBatchDrawTextureEx(spriteBatch, label->texture, label->position, label->size, label->rect, 0.0f, color);
+  }
+}
+
+void uiLabelDestroy(UILabel* label)
+{
+  heroTextureUnload(label->texture);
+  free(label);
+}
+
 UIWidget* uiWidgetCreate()
 {
   UIWidget* widget = (UIWidget*)malloc(sizeof(UIWidget));
@@ -121,6 +188,8 @@ void uiWidgetUpdate(UIWidget* widget, HeroInput* input)
 void uiWidgetDraw(UIWidget* widget, HeroSpriteBatch* spriteBatch)
 {
   uiButtonDraw(spriteBatch, widget->buttons, widget->buttonNumber);
+  uiImageDraw(widget->images, widget->imageNumber, spriteBatch);
+  uiLabelDraw(widget->labels, widget->labelNumber, spriteBatch);
 }
 
 void uiWidgetDestroy(UIWidget* widget)
@@ -130,5 +199,15 @@ void uiWidgetDestroy(UIWidget* widget)
     uiButtonDestory(widget->buttons[i]);
   }
   free(widget->buttons);
+  for(int i = 0; i < widget->imageNumber; i++)
+  {
+    uiImageDestroy(widget->images[i]);
+  }
+  free(widget->images);
+  for(int i = 0; i < widget->labelNumber; i++)
+  {
+    uiLabelDestroy(widget->labels[i]);
+  }
+  free(widget->labels);
   free(widget);
 }

@@ -45,10 +45,40 @@ void uiImageSetRect(UIImage* image, HeroInt4 rect);
 void uiImageDraw(UIImage** images, uint32_t number, HeroSpriteBatch* spriteBatch);
 void uiImageDestroy(UIImage* image);
 
+typedef enum
+{
+  UIALLIGMENT_TOPLEFT,
+  UIALLIGMENT_TOP,
+  UIALLIGMENT_TOPRIGHT,
+  UIALLIGMENT_LEFT,
+  UIALLIGMENT_CENTER,
+  UIALLIGMENT_RIGHT,
+  UIALLIGMENT_BOTTOMLEFT,
+  UIALLIGMENT_BOTTOM,
+  UIALLIGMENT_BOTTOMRIGHT
+} UIAlligment;
+
+typedef struct
+{
+  HeroTexture* texture;
+  HeroInt2 position;
+  HeroInt2 size;
+  HeroInt4 rect;
+  HeroColor color;
+} UILabel;
+
+UILabel* uiLabelCreate(const char* text, HeroFont* font, HeroColor color, UIAlligment alligment, HeroInt2 position, HeroInt2 size);
+void uiLabelDraw(UILabel** labels, uint32_t number, HeroSpriteBatch* spriteBatch);
+void uiLabelDestroy(UILabel* label);
+
 typedef struct
 {
   UIButton** buttons;
   uint32_t buttonNumber;
+  UIImage** images;
+  uint32_t imageNumber;
+  UILabel** labels;
+  uint32_t labelNumber;
 } UIWidget;
 
 UIWidget* uiWidgetCreate();
