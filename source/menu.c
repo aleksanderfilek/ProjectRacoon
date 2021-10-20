@@ -26,11 +26,12 @@ GameMenu* gameMenuInit()
 
   menu->spriteBatch = heroSpriteBatchInit(window, 10, 10, menu->shader);
   
-  menu->texturesNumber = 3;
+  menu->texturesNumber = 4;
   menu->textures = (HeroTexture**)malloc(menu->texturesNumber * sizeof(HeroTexture*));
   menu->textures[0] = heroTextureLoad("assets\\sprites\\playBtn.png", 0);
   menu->textures[1] = heroTextureLoad("assets\\sprites\\quitBtn.png", 0);
   menu->textures[2] = heroTextureLoad("assets\\sprites\\backBtn.png", 0);
+  menu->textures[3] = heroTextureLoad("assets\\sprites\\background.png", 0);
 
   menu->widgets[0] = widgetConstructMainMenu(menu);
   menu->widgets[1] = widgetConstructPlayMenu(menu);
@@ -125,12 +126,14 @@ static UIWidget* widgetConstructMainMenu(GameMenu* menu)
   uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
   widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){50,150},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
+  widget->imageNumber = 1;
+  widget->images = (UIImage**)malloc(widget->imageNumber * sizeof(UIImage*));
+  widget->images[0] = uiImageCreate(menu->textures[3], (HeroInt2){50,300},(HeroInt2){100,15});
   widget->labelNumber = 1;
   widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
-  
   HeroFont* font = heroFontLoad("assets\\fonts\\arial.ttf", 32);
   widget->labels[0] = uiLabelCreate("Hello, World!", font, (HeroColor){0,0,0,0},
-                                    UIALLIGMENT_TOPLEFT, (HeroInt2){50,300},(HeroInt2){200,64});
+                                   UIALLIGMENT_TOP, (HeroInt2){50,300},(HeroInt2){100,15});
   heroFontUnload(font);
 
   return widget;

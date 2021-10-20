@@ -122,36 +122,63 @@ UILabel* uiLabelCreate(const char* text, HeroFont* font, HeroColor color, UIAlli
   {
     case UIALLIGMENT_TOPLEFT:
       label->position = position;
-      label->size.x = Min(textureSize.x, size.x);
-      label->size.y = Min(textureSize.y, size.y);
     break;
     case UIALLIGMENT_TOP:
-
+      label->position.x = position.x + (size.x - textureSize.x)/2;
+      label->position.y = position.y;
     break;
     case UIALLIGMENT_TOPRIGHT:
-
+      label->position.x = position.x + size.x - textureSize.x;
+      label->position.y = position.y;
     break;
     case UIALLIGMENT_LEFT:
-
+      label->position.x = position.x;
+      label->position.y = position.y + (size.y - textureSize.y)/2;
     break;
     case UIALLIGMENT_CENTER:
-
+      label->position.x = position.x + (size.x - textureSize.x)/2;
+      label->position.y = position.y + (size.y - textureSize.y)/2;
     break;
     case UIALLIGMENT_RIGHT:
-
+      label->position.x = position.x + size.x - textureSize.x;
+      label->position.y = position.y + (size.y - textureSize.y)/2;
     break;
     case UIALLIGMENT_BOTTOMLEFT:
-
+      label->position.x = position.x;
+      label->position.y = position.y + size.y - textureSize.y;
     break;
     case UIALLIGMENT_BOTTOM:
-
+      label->position.x = position.x + (size.x - textureSize.x)/2;
+      label->position.y = position.y + size.y - textureSize.y;
     break;
     case UIALLIGMENT_BOTTOMRIGHT:
-
+      label->position.x = position.x + size.x - textureSize.x;
+      label->position.y = position.y + size.y - textureSize.y;
     break;
   }
 
-  label->rect = (HeroInt4){0,0,label->size.x,label->size.y};
+  int lpsx = label->position.x + textureSize.x;
+  int lpsy = label->position.y + textureSize.y;
+  int psx = position.x + size.x;
+  int psy = position.y + size.y;
+
+  label->rect.x = (label->position.x >= position.x)? 0 : position.x - label->position.x;
+  label->rect.y = (label->position.y >= position.y)? 0 : position.y - label->position.y;
+  label->rect.z = (lpsx <= psx)? textureSize.x : position.x + size.x  - label->position.x;
+  label->rect.w = (lpsy <= psy)? textureSize.y : position.y + size.y  - label->position.y;
+
+  label->size.x = Min(lpsx, psx);
+  label->size.x -= (label->position.x >= position.x)?label->position.x:position.x;
+  label->size.y = Min(lpsy, psy);
+  label->size.y -= (label->position.y >= position.y)?label->position.y:position.y;
+
+  label->position.x = Max(label->position.x, position.x);
+  label->position.y = Max(label->position.y, position.y);
+
+  printf("P(%d,%d), S(%d,%d), LP(%d,%d), LS(%d,%d), R(%d,%d,%d,%d), TS(%d,%d)\n", position.x, position.y, size.x, size.y,
+    label->position.x,label->position.y,label->size.x,label->size.y,
+    label->rect.x,label->rect.y,label->rect.z,label->rect.w,
+    textureSize.x,textureSize.y);
 
   return label;
 }
