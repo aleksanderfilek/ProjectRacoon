@@ -174,12 +174,12 @@ UILabel* uiLabelCreate(const char* text, HeroFont* font, HeroColor color, UIAlli
 
   label->position.x = Max(label->position.x, position.x);
   label->position.y = Max(label->position.y, position.y);
-
+/*
   printf("P(%d,%d), S(%d,%d), LP(%d,%d), LS(%d,%d), R(%d,%d,%d,%d), TS(%d,%d)\n", position.x, position.y, size.x, size.y,
     label->position.x,label->position.y,label->size.x,label->size.y,
     label->rect.x,label->rect.y,label->rect.z,label->rect.w,
     textureSize.x,textureSize.y);
-
+*/
   return label;
 }
 
