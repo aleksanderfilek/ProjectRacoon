@@ -4,6 +4,7 @@
 #include"Hero\Hero.h"
 
 #include"Game\ui.h"
+#include"Game/play.h"
 
 #include<stdint.h>
 
@@ -32,7 +33,7 @@ typedef struct
 
 } GameMenu;
 
-GameMenu* gameMenuInit();
+void* gameMenuInit();
 void gameMenuUpdate(void* ptr);
 void gameMenuDestroy(void* ptr);
 

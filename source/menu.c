@@ -1,4 +1,4 @@
-#include"Game\menu.h"
+#include"Game/state.h"
 
 #include<stdlib.h>
 #include<stdio.h>
@@ -11,10 +11,11 @@ static void changeState(GameMenu* menu, MenuState state);
 static void playClick();
 static void quitClick();
 static void backToMenuClick();
+static void gameClick();
 static UIWidget* widgetConstructMainMenu(GameMenu* menu);
 static UIWidget* widgetConstructPlayMenu(GameMenu* menu);
 
-GameMenu* gameMenuInit()
+void* gameMenuInit()
 {
   GameMenu* menu = (GameMenu*)malloc(sizeof(GameMenu));
 
@@ -116,6 +117,12 @@ static void backToMenuClick(void* arg)
   changeState((GameMenu*)arg, MENUSTATE_MAIN);
 }
 
+static void gameClick(void* arg)
+{
+  GameState* state = heroCoreModuleGet(core, "state");
+  gameStateChange(state, GAMESTATE_PLAY);
+}
+
 static UIWidget* widgetConstructMainMenu(GameMenu* menu)
 {
   UIWidget* widget = uiWidgetCreate();
@@ -126,14 +133,11 @@ static UIWidget* widgetConstructMainMenu(GameMenu* menu)
   uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
   widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){50,150},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
-  widget->imageNumber = 1;
-  widget->images = (UIImage**)malloc(widget->imageNumber * sizeof(UIImage*));
-  widget->images[0] = uiImageCreate(menu->textures[3], (HeroInt2){50,300},(HeroInt2){100,15});
   widget->labelNumber = 1;
   widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
-  HeroFont* font = heroFontLoad("assets\\fonts\\arial.ttf", 32);
-  widget->labels[0] = uiLabelCreate("Hello, World!", font, (HeroColor){0,0,0,0},
-                                   UIALLIGMENT_TOP, (HeroInt2){50,300},(HeroInt2){100,15});
+  HeroFont* font = heroFontLoad("assets\\fonts\\arial.ttf", 16);
+  widget->labels[0] = uiLabelCreate("Created by Aleksander Filek", font, (HeroColor){0,0,0,0},
+                                   UIALLIGMENT_BOTTOMRIGHT, (HeroInt2){0,0},(HeroInt2){1280,720});
   heroFontUnload(font);
 
   return widget;
@@ -143,10 +147,11 @@ static UIWidget* widgetConstructPlayMenu(GameMenu* menu)
 {
   UIWidget* widget = uiWidgetCreate();
 
-  widget->buttonNumber = 1;
+  widget->buttonNumber = 2;
   widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
   widget->buttons[0] = uiButtonCreate(menu->textures[2], (HeroInt2){50,50},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[0], backToMenuClick, menu);
-
+  widget->buttons[1] = uiButtonCreate(menu->textures[0], (HeroInt2){50,150},(HeroInt2){386,64});
+  uiButtonSetClickFunc(widget->buttons[1], gameClick, menu);
   return widget;
 }

@@ -1,5 +1,5 @@
 #include"Hero/Hero.h"
-#include"Game/menu.h"
+#include"Game/state.h"
 
 HeroCore* core = NULL;
 
@@ -21,8 +21,8 @@ int main(int argc, char *argv[])
     heroEventAddWindow(event, (HeroWindow*)window);
     heroCoreModuleAdd(core, "event", event, heroEventUpdate, heroEventDestroy);
 
-    void* menu = gameMenuInit();
-    heroCoreModuleAdd(core, "menu", menu, gameMenuUpdate, gameMenuDestroy);
+    void* state = gameStateInit();
+    heroCoreModuleAdd(core, "state", state, gameStateUpdate, gameStateDestroy);
   }
 
   heroCoreStart(core);
