@@ -17,7 +17,6 @@ static UIWidget* widgetConstructPlayMenu(GameMenu* menu);
 
 void* gameMenuInit()
 {
-  printf("menu init\n");
   GameMenu* menu = (GameMenu*)malloc(sizeof(GameMenu));
 
   HeroWindow* window = heroCoreModuleGet(core, "window");
@@ -52,8 +51,6 @@ void* gameMenuInit()
 
 void gameMenuUpdate(void* ptr)
 {
-  printf("menu update\n");
-
   GameMenu* menu = (GameMenu*)ptr;
 
   update(menu);

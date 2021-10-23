@@ -10,8 +10,21 @@
 
 typedef enum
 {
-    HERO_WINDOW_CLOSE = 0,
-    HERO_WINDOW_COUNT = 1
+    HERO_WINDOW_SHOWN = 0,
+    HERO_WINDOW_HIDDEN = 1,
+    HERO_WINDOW_EXPOSED = 2,
+    HERO_WINDOW_MOVED = 3,
+    HERO_WINDOW_RESIZED = 4,
+    HERO_WINDOW_SIZE_CHANGED = 5,
+    HERO_WINDOW_MINIMIZED = 6,
+    HERO_WINDOW_MAXIMIZED = 7,
+    HERO_WINDOW_RESTORED = 8,
+    HERO_WINDOW_ENTER = 9,
+    HERO_WINDOW_LEAVE = 10,
+    HERO_WINDOW_FOCUS_GAINED = 11,
+    HERO_WINDOW_FOCUS_LOST = 12,
+    HERO_WINDOW_CLOSE = 13,
+    HERO_WINDOW_COUNT = 14
 } HeroWindowEventType;
 
 typedef void* HeroWindow;
@@ -33,7 +46,7 @@ extern void heroWindowSetCurrent(HeroWindow* window);
 extern void heroWindowSetBackgroundColor(HeroWindow* window, HeroColor backgroundColor);
 
 extern void heroWindowHandleEvents(HeroWindow* window, SDL_Event* event);
-extern void heroWindowSetEvent(HeroWindow* window, HeroWindowEventType event, void (*func)(void* data));
+extern void heroWindowSetEvent(HeroWindow* window, HeroWindowEventType event, void (*func)(void** data));
 
 #ifdef __cplusplus
 }

@@ -3,7 +3,7 @@
 
 HeroCore* core = NULL;
 
-void gameClose(void*);
+void gameClose(void**);
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
   return 0;
 }
 
-void gameClose(void* data)
+void gameClose(void** data)
 {
   heroCoreClose(core);
 }

@@ -5,7 +5,7 @@
 
 extern HeroCore* core;
 
-void leveleditorclose(void*ptr);
+void leveleditorclose(void**ptr);
 
 void* gameLevelEditorInit()
 {
@@ -22,7 +22,7 @@ void* gameLevelEditorInit()
   HeroEvent* event = heroCoreModuleGet(core, "event");
   heroEventAddWindow(event, leveleditor->toolWindow);
 
-  heroWindowSetCurrent(leveleditor->toolWindow );
+  heroWindowSetCurrent( leveleditor->toolWindow );
 
   return leveleditor;
 }
@@ -46,7 +46,7 @@ void gameLevelEditorDestroy(void* ptr)
   free(ptr);
 }
 
-void leveleditorclose(void*ptr)
+void leveleditorclose(void** ptr)
 {
   GameState* state = heroCoreModuleGet(core, "state");
   gameStateChange(state, GAMESTATE_MENU);

@@ -7,7 +7,6 @@ static void checkState(GameState* gameState);
 
 GameState* gameStateInit()
 {
-  printf("menu init\n");
   GameState* state = (GameState*)malloc(sizeof(GameState));
 
   state->init[(int)GAMESTATE_MENU] = gameMenuInit;
@@ -32,7 +31,6 @@ GameState* gameStateInit()
 void gameStateUpdate(void* ptr)
 {
   GameState* state = (GameState*)ptr;
-  printf("current state = %d\n", (int)state->currentState);
 
   checkState(state);
   state->update[(int)state->currentState](state->currentStateData);
