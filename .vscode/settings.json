@@ -2,6 +2,7 @@
   "files.associations": {
     "initializer_list": "c",
     "type_traits": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "play.h": "c"
   }
 }

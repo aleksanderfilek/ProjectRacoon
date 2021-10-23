@@ -3,9 +3,17 @@
 
 #include<stdbool.h>
 
+#include"Hero\Hero.h"
+
+#include"Game\state.h"
+
 typedef struct
 {
-  bool active;
+  SDL_Window* sdlWindow;
+  HeroInput* input;
+
+  HeroWindow* toolWindow;
+  SDL_Window* toolSdlWindow;
 } GameLevelEditor;
 
 void* gameLevelEditorInit();

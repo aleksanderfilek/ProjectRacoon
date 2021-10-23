@@ -17,6 +17,7 @@ static UIWidget* widgetConstructPlayMenu(GameMenu* menu);
 
 void* gameMenuInit()
 {
+  printf("menu init\n");
   GameMenu* menu = (GameMenu*)malloc(sizeof(GameMenu));
 
   HeroWindow* window = heroCoreModuleGet(core, "window");
@@ -49,11 +50,22 @@ void* gameMenuInit()
 
 void gameMenuUpdate(void* ptr)
 {
+  printf("menu update\n");
+
   GameMenu* menu = (GameMenu*)ptr;
 
   update(menu);
 
   draw(menu);
+
+  DEBUG_CODE(
+    if(heroInputKeyPressed(menu->input, HERO_KEYCODE_LCTRL) && 
+      heroInputKeyPressed(menu->input, HERO_KEYCODE_L)){
+        printf("leveleditor\n");
+        GameState* state = heroCoreModuleGet(core, "state");
+        gameStateChange(state, GAMESTATE_LEVELEDITOR);
+      }
+  )
 }
 
 void gameMenuDestroy(void* ptr)
@@ -87,7 +99,6 @@ static void update(GameMenu* menu)
 static void draw(GameMenu* menu)
 {
   glClear(GL_COLOR_BUFFER_BIT);
-
 
   heroSpriteBatchBegin(menu->spriteBatch);
   uiWidgetDraw(menu->currentWidget, menu->spriteBatch);

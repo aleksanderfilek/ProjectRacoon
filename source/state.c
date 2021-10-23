@@ -1,11 +1,13 @@
 #include"Game/state.h"
 
 #include<stdlib.h>
+#include<stdio.h>
 
 static void checkState(GameState* gameState);
 
 GameState* gameStateInit()
 {
+  printf("menu init\n");
   GameState* state = (GameState*)malloc(sizeof(GameState));
 
   state->init[(int)GAMESTATE_MENU] = gameMenuInit;
@@ -30,9 +32,9 @@ GameState* gameStateInit()
 void gameStateUpdate(void* ptr)
 {
   GameState* state = (GameState*)ptr;
+  printf("current state = %d\n", (int)state->currentState);
 
   checkState(state);
-
   state->update[(int)state->currentState](state->currentStateData);
 }
 
@@ -59,6 +61,7 @@ static void checkState(GameState* gameState)
 
   gameState->destory[(int)gameState->currentState](gameState->currentStateData);
   gameState->currentState = gameState->nextState;
+  printf("change state = %d\n", (int)gameState->currentState);
   gameState->currentStateData = gameState->init[(int)gameState->currentState]();
   gameState->nextState = GAMESTATE_NONE;
 }
