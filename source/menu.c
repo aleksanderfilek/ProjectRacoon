@@ -24,16 +24,18 @@ void* gameMenuInit()
   menu->sdlWindow = heroWindowGetSdlWindow(window);
   menu->input = heroCoreModuleGet(core, "input");
 
-  menu->shader = heroShaderLoad("assets\\shaders\\shader.vert","assets\\shaders\\shader.frag");
+  heroWindowSetCurrent(window);
+
+  menu->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
 
   menu->spriteBatch = heroSpriteBatchInit(window, 10, 10, menu->shader);
   
   menu->texturesNumber = 4;
   menu->textures = (HeroTexture**)malloc(menu->texturesNumber * sizeof(HeroTexture*));
-  menu->textures[0] = heroTextureLoad("assets\\sprites\\playBtn.png", 0);
-  menu->textures[1] = heroTextureLoad("assets\\sprites\\quitBtn.png", 0);
-  menu->textures[2] = heroTextureLoad("assets\\sprites\\backBtn.png", 0);
-  menu->textures[3] = heroTextureLoad("assets\\sprites\\background.png", 0);
+  menu->textures[0] = heroTextureLoad("assets/sprites/playBtn.png", 0);
+  menu->textures[1] = heroTextureLoad("assets/sprites/quitBtn.png", 0);
+  menu->textures[2] = heroTextureLoad("assets/sprites/backBtn.png", 0);
+  menu->textures[3] = heroTextureLoad("assets/sprites/background.png", 0);
 
   menu->widgets[0] = widgetConstructMainMenu(menu);
   menu->widgets[1] = widgetConstructPlayMenu(menu);
@@ -74,7 +76,7 @@ void gameMenuDestroy(void* ptr)
 
   for(int i=0; i < menu->texturesNumber; i++)
   {
-    heroTextureUnload(menu->textures[0]);
+    heroTextureUnload(menu->textures[i]);
   }
 
   for(int i=0; i < 2; i++)
@@ -146,7 +148,7 @@ static UIWidget* widgetConstructMainMenu(GameMenu* menu)
   uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
   widget->labelNumber = 1;
   widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
-  HeroFont* font = heroFontLoad("assets\\fonts\\arial.ttf", 16);
+  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 16);
   widget->labels[0] = uiLabelCreate("Created by Aleksander Filek", font, (HeroColor){0,0,0,0},
                                    UIALLIGMENT_BOTTOMRIGHT, (HeroInt2){0,0},(HeroInt2){1280,720});
   heroFontUnload(font);

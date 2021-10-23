@@ -3,9 +3,9 @@
 
 #include<stdbool.h>
 
-#include"Hero\Hero.h"
+#include"Hero/Hero.h"
 
-#include"Game\state.h"
+#include"Game/state.h"
 
 typedef struct
 {

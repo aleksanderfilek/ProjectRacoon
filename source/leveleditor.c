@@ -5,7 +5,7 @@
 
 extern HeroCore* core;
 
-void close(void*ptr);
+void leveleditorclose(void*ptr);
 
 void* gameLevelEditorInit()
 {
@@ -15,13 +15,14 @@ void* gameLevelEditorInit()
   leveleditor->sdlWindow = heroWindowGetSdlWindow(window);
   leveleditor->input = heroCoreModuleGet(core, "input");
 
-  glClearColor(0.9f,0.0f,0.9f,1.0f);
-
   leveleditor->toolWindow = heroWindowInit("LevelEditorTools", 640, 480, 0);
-  heroWindowSetEvent(leveleditor->toolWindow, HERO_WINDOW_CLOSE, close);
+  heroWindowSetBackgroundColor(leveleditor->toolWindow, (HeroColor){255,0,0,255});
+  heroWindowSetEvent(leveleditor->toolWindow, HERO_WINDOW_CLOSE, leveleditorclose);
   leveleditor->toolSdlWindow = heroWindowGetSdlWindow(leveleditor->toolWindow);
   HeroEvent* event = heroCoreModuleGet(core, "event");
   heroEventAddWindow(event, leveleditor->toolWindow);
+
+  heroWindowSetCurrent(leveleditor->toolWindow );
 
   return leveleditor;
 }
@@ -30,9 +31,9 @@ void gameLevelEditorUpdate(void* ptr)
 {
   GameLevelEditor* leveleditor = (GameLevelEditor*)ptr;
 
-  // glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT);
 
-  // SDL_GL_SwapWindow(leveleditor->toolSdlWindow);
+  SDL_GL_SwapWindow(leveleditor->toolSdlWindow);
 }
 
 void gameLevelEditorDestroy(void* ptr)
@@ -45,7 +46,7 @@ void gameLevelEditorDestroy(void* ptr)
   free(ptr);
 }
 
-void close(void*ptr)
+void leveleditorclose(void*ptr)
 {
   GameState* state = heroCoreModuleGet(core, "state");
   gameStateChange(state, GAMESTATE_MENU);

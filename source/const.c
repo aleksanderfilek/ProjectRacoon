@@ -1,0 +1,1 @@
+char* WINDOW = "widnow";

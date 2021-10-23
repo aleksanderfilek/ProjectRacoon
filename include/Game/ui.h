@@ -1,7 +1,7 @@
 #ifndef GAME_UI_H_
 #define GAME_UI_H_
 
-#include"Hero\Hero.h"
+#include"Hero/Hero.h"
 
 #include<stdint.h>
 #include<stdbool.h>

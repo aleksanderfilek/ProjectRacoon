@@ -1,9 +1,9 @@
 #ifndef GAME_MENU_H_
 #define GAME_MENU_H_
 
-#include"Hero\Hero.h"
+#include"Hero/Hero.h"
 
-#include"Game\ui.h"
+#include"Game/ui.h"
 #include"Game/play.h"
 
 #include<stdint.h>
