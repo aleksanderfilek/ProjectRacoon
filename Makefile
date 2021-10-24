@@ -16,7 +16,7 @@ ifeq ($(OS),Windows_NT)
 	COPY = xcopy /s /e
 	IFEXIST = if exist
 	LIBDIR = lib\windows
-	LIBS = -Llib\windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
+	LIBS = -Llib\windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm -ljson-c
 	EXTENSION = .exe
 else
 	RM = rm -rf
