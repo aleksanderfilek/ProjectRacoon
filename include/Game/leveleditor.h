@@ -10,14 +10,15 @@
 
 typedef struct
 {
-  HeroWindow* window;
-  SDL_Window* sdlWindow;
+  HeroWindow* mainWindow;
+  SDL_Window* mainSdlWindow;
   HeroInput* input;
 
   HeroWindow* toolWindow;
   SDL_Window* toolSdlWindow;
 
-  HeroSpriteBatch* spriteBatch;
+  HeroSpriteBatch* toolSpriteBatch;
+  HeroSpriteBatch* mainSpriteBatch;
   HeroShader* shader;
 
   GameSpriteSheet* levelEditorSpriteSheet;

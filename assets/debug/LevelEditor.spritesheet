@@ -1,2 +1,11 @@
-assets/debug/LevelEditor/Tex.png
+assets/debug/LevelEditorTex.png
+newBtnD 0 0 71 30
+saveBtnD 71 0 78 30
+openBtnD 149 0 77 30
+exitBtnD 226 0 62 30
+newBtnH 0 30 71 30
+saveBtnh 71 30 78 30
+openBtnH 149 30 77 30
+exitBtnH 226 30 62 30
 logo 0 60 30 90
+panel 30 60 60 90
