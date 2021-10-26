@@ -3,7 +3,7 @@ HEADERDIR = include
 SOURCEDIR = source
 
 TARGET = main
-CC = gcc -std=c99
+CC = gcc
 INC = -Iinclude
 
 SOURCES = $(wildcard $(SOURCEDIR)/*.c)
@@ -16,7 +16,7 @@ ifeq ($(OS),Windows_NT)
 	COPY = xcopy /s /e
 	IFEXIST = if exist
 	LIBDIR = lib\windows
-	LIBS = -Llib\windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm -ljson-c
+	LIBS = -Llib\windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
 	EXTENSION = .exe
 else
 	RM = rm -rf

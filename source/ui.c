@@ -38,7 +38,7 @@ void uiButtonUpdate(UIButton** buttons, uint32_t number, HeroInput* input)
   int mouseX, mouseY;
   heroInputGetMousePosition(input, &mouseX, &mouseY);
   bool leftClick = heroInputMouseButtonDown(input, HERO_MOUSE_LEFT);
-
+  bool leftPressed = heroInputMouseButtonPressed(input, HERO_MOUSE_LEFT);
   for(int i = 0; i < number; i++)
   {
     UIButton* button = buttons[i];
@@ -50,8 +50,11 @@ void uiButtonUpdate(UIButton** buttons, uint32_t number, HeroInput* input)
 
       if(leftClick == true)
       {
-        button->state = UIBUTTONSTATE_CLICK;
         button->click(button->arg);
+      }
+      if(leftPressed == true)
+      {
+        button->state = UIBUTTONSTATE_CLICK;
       }
 
       continue;
