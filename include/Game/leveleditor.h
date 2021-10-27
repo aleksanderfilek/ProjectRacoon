@@ -7,6 +7,7 @@
 
 #include"Game/state.h"
 #include"Game/spritesheet.h"
+#include"Game/ui.h"
 
 typedef struct
 {
@@ -22,7 +23,8 @@ typedef struct
   HeroShader* shader;
 
   GameSpriteSheet* levelEditorSpriteSheet;
-  GameSpriteSheetIndex logoIndex;
+
+  UIWidget* toolWidget;
 } GameLevelEditor;
 
 void* gameLevelEditorInit();

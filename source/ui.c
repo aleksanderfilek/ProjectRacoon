@@ -70,7 +70,7 @@ void uiButtonDraw(HeroSpriteBatch* spriteBatch, UIButton** buttons, uint32_t num
   for(int i = 0; i < number; i++)
   {
     UIButton* button = buttons[i];
-    heroSpriteBatchDrawTextureEx(spriteBatch, button->texture, button->position, button->size, button->rect[button->state], 0.0f, color);
+    heroSpriteBatchDrawTextureEx(spriteBatch, button->texture, button->position, button->size, button->rect[(int)button->state], 0.0f, color);
   }
 }
 

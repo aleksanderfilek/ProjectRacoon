@@ -23,7 +23,7 @@ void* gameMenuInit()
   menu->sdlWindow = heroWindowGetSdlWindow(window);
   menu->input = heroCoreModuleGet(core, "input");
 
-  heroWindowSetCurrent(window);
+  heroWindowSetCurrentContext(window);
 
   menu->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
 
