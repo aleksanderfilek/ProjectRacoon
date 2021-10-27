@@ -23,8 +23,12 @@ typedef struct
   HeroShader* shader;
 
   GameSpriteSheet* levelEditorSpriteSheet;
-
+  GameSpriteSheet* brickSpriteSheet;
+  char** infoText;
   UIWidget* toolWidget;
+
+  bool changed;
+  uint32_t currentBrick;
 } GameLevelEditor;
 
 void* gameLevelEditorInit();

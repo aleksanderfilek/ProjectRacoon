@@ -38,6 +38,7 @@ typedef struct
   HeroInt2 position;
   HeroInt2 size;
   HeroInt4 rect;
+  bool visible;
 } UIImage;
 
 UIImage* uiImageCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size);
@@ -65,6 +66,7 @@ typedef struct
   HeroInt2 size;
   HeroInt4 rect;
   HeroColor color;
+  bool visible;
 } UILabel;
 
 UILabel* uiLabelCreate(const char* text, HeroFont* font, HeroColor color, UIAlligment alligment, HeroInt2 position, HeroInt2 size);

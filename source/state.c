@@ -3,6 +3,9 @@
 #include<stdlib.h>
 #include<stdio.h>
 
+#define str(x) #x
+#define xstr(x) str(x)
+
 static void checkState(GameState* gameState);
 
 GameState* gameStateInit()
@@ -59,7 +62,7 @@ static void checkState(GameState* gameState)
 
   gameState->destory[(int)gameState->currentState](gameState->currentStateData);
   gameState->currentState = gameState->nextState;
-  printf("change state = %d\n", (int)gameState->currentState);
+  DEBUG_CODE(printf("[Game state] current state number: %d\n", (int)gameState->currentState);)
   gameState->currentStateData = gameState->init[(int)gameState->currentState]();
   gameState->nextState = GAMESTATE_NONE;
 }

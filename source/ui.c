@@ -87,7 +87,8 @@ UIImage* uiImageCreate(HeroTexture* texture, HeroInt2 position, HeroInt2 size)
   image->position = position;
   image->size = size;
   image->rect = (HeroInt4){0,0,size.x,size.y};
-
+  image->visible = true;
+  
   return image;
 }
 
@@ -103,6 +104,10 @@ void uiImageDraw(UIImage** images, uint32_t number, HeroSpriteBatch* spriteBatch
   for(int i = 0; i < number; i++)
   {
     UIImage* image = images[i];
+    if(image->visible == false)
+    {
+      continue;
+    }
     heroSpriteBatchDrawTextureEx(spriteBatch, image->texture, image->position, image->size, image->rect, 0.0f, color);
   }
 }
@@ -115,7 +120,7 @@ void uiImageDestroy(UIImage* image)
 UILabel* uiLabelCreate(const char* text, HeroFont* font, HeroColor color, UIAlligment alligment, HeroInt2 position, HeroInt2 size)
 {
   UILabel* label = (UILabel*)malloc(sizeof(UILabel));
-
+  label->visible = true;
   label->texture = heroTextureFromText(text, &color, font, 0);
   HeroInt2 textureSize = heroTextureGetSize(label->texture);
 
@@ -186,6 +191,11 @@ void uiLabelDraw(UILabel** labels, uint32_t number, HeroSpriteBatch* spriteBatch
   for(int i = 0; i < number; i++)
   {
     UILabel* label = labels[i];
+    if(label->visible == false)
+    {
+      continue;
+    }
+
     heroSpriteBatchDrawTextureEx(spriteBatch, label->texture, label->position, label->size, label->rect, 0.0f, color);
   }
 }
@@ -195,6 +205,7 @@ void uiLabelDestroy(UILabel* label)
   heroTextureUnload(label->texture);
   free(label);
 }
+
 
 UIWidget* uiWidgetCreate()
 {

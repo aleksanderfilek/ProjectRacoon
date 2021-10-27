@@ -60,7 +60,6 @@ void gameMenuUpdate(void* ptr)
   DEBUG_CODE(
     if(heroInputKeyPressed(menu->input, HERO_KEYCODE_LCTRL) && 
       heroInputKeyPressed(menu->input, HERO_KEYCODE_L)){
-        printf("leveleditor\n");
         GameState* state = heroCoreModuleGet(core, "state");
         gameStateChange(state, GAMESTATE_LEVELEDITOR);
       }

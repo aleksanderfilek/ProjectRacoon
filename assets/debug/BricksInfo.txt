@@ -1,0 +1,7 @@
+Brick 1 - Normal brick
+Brick 2 - Normal brick
+Brick 3 - Normal brick
+Brick 4 - Normal brick
+Brick 5 - Normal brick
+Brick 6 - Normal brick
+Brick 7 - Normal brick
