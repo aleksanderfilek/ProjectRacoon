@@ -4,6 +4,8 @@
 #include<stdlib.h>
 #include<string.h>
 
+#include"Hero/H_files.h"
+
 extern HeroCore* core;
 
 static void levelEditorclose(void**ptr);
@@ -144,7 +146,7 @@ static void draw(GameLevelEditor* levelEditor)
 
     heroSpriteBatchBegin(levelEditor->mainSpriteBatch);
 
-    uiWidgetDraw(levelEditor->mainWidget, levelEditor->mainSpriteBatch);
+    //uiWidgetDraw(levelEditor->mainWidget, levelEditor->mainSpriteBatch);
 
     heroSpriteBatchEnd(levelEditor->mainSpriteBatch);
 
@@ -321,7 +323,10 @@ static void saveBtnClick(void* arg)
 
 static void openBtnClick(void* arg)
 {
-  printf("open click\n");
+  char const * lFilterPatterns[2] = { "*.txt", "*.text" };
+  char* filePath = heroFileDialogOpen("Select file", "", 2, lFilterPatterns, NULL, 0);
+
+  printf("%s\n",filePath);
 }
 
 static void exitBtnClick(void* arg)

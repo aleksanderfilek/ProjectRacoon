@@ -15,45 +15,47 @@ ifeq ($(OS),Windows_NT)
 	MKDIR = mkdir
 	COPY = xcopy /s /e
 	IFEXIST = if exist
-	LIBDIR = lib\windows
-	LIBS = -Llib\windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
+	LIBDIR = lib/windows
+	LIBS = -Llib/windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
 	EXTENSION = .exe
 else
+	OS = linux
 	RM = rm -rf
 	RMDIR = rm -rf
 	MKDIR = mkdir -p
 	IFEXIST = 
-	LIBDIR = lib\linux
-	LIBS = -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
-	EXTENSION
+	COPY = cp -R
+	LIBDIR = lib/linux
+	LIBS = -Llib/linux -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
+	EXTENSION = 
 endif
 
 debug: clearDebug buildDebug clean
 release: clearRelease buildRelease clean
 runDebug: 
-	build\debug\$(OS)\$(TARGET)$(EXTENSION)
+	build/debug/$(OS)/$(TARGET)$(EXTENSION)
 runRelease: 
-	build\release\$(OS)\$(TARGET)$(EXTENSION)
+	build/release/$(OS)/$(TARGET)$(EXTENSION)
 
 buildDebug:
-	$(MKDIR) build\debug\$(OS)\assets
-	$(COPY) assets build\debug\$(OS)\assets
-	$(COPY) $(LIBDIR) build\debug\$(OS)
+	$(MKDIR) build/debug/$(OS)/assets
+	$(COPY) assets build/debug/$(OS)
+	$(COPY) $(LIBDIR) build/debug
 	$(CC) $(INC) -D DEBUG -c $(SOURCES)
-	$(CC) $(INC) -D DEBUG -o build\debug\$(OS)\$(TARGET) $(OBJECTS) $(LIBS)
+	$(CC) $(INC) -D DEBUG -o build/debug/$(OS)/$(TARGET) $(OBJECTS) $(LIBS)
 
 buildRelease:
-	$(MKDIR) build\release\$(OS)\assets
-	$(COPY) assets build\release\$(OS)\assets
-	$(COPY) $(LIBDIR) build\release\$(OS)
+	$(MKDIR) build/release/$(OS)/assets
+	$(COPY) assets build/release/$(OS)/assets
+	$(COPY) $(LIBDIR) build/release/$(OS)
 	$(CC) $(INC) -O3 -c $(SOURCES)
-	$(CC) $(INC) -O3 -mwindows -o build\release\$(OS)\$(TARGET) $(OBJECTS) $(LIBS)
+	$(CC) $(INC) -O3 -mwindows -o build/release/$(OS)/$(TARGET) $(OBJECTS) $(LIBS)
 
 clearDebug:
-	$(IFEXIST) build\debug\$(OS) $(RMDIR) build\debug\$(OS)
+	$(RMDIR) build/debug/$(OS)
 
 clearRelease:
-	$(IFEXIST) build\release\$(OS) $(RMDIR) build\release\$(OS)
+	$(IFEXIST) build/release/$(OS) $(RMDIR) build/release/$(OS)
 
 clean:
 	$(RM) *.o
