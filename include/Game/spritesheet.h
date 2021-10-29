@@ -19,5 +19,6 @@ GameSpriteSheet* gameSpriteSheetLoad(const char* path);
 void gameSpriteSheetUnload(GameSpriteSheet* spriteSheet);
 GameSpriteSheetIndex gameSpriteSheetGet(GameSpriteSheet* spriteSheet, const char* name);
 HeroInt4 gameSpriteSheetGetRect(GameSpriteSheet* spriteSheet, GameSpriteSheetIndex index);
+HeroInt4 gameSpriteSheetGetRectByName(GameSpriteSheet* spriteSheet, const char* name);
 
 #endif

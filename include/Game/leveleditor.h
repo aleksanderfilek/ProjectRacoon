@@ -9,6 +9,9 @@
 #include"Game/spritesheet.h"
 #include"Game/ui.h"
 
+#define BRICKS_COLUMNS 25
+#define BRICKS_ROWS 10
+
 typedef struct
 {
   HeroWindow* mainWindow;
@@ -26,9 +29,12 @@ typedef struct
   GameSpriteSheet* brickSpriteSheet;
   char** infoText;
   UIWidget* toolWidget;
-
+  UIWidget* mainWidget;
+  
   bool changed;
   uint32_t currentBrick;
+
+  uint8_t bricks[BRICKS_ROWS * BRICKS_COLUMNS];
 } GameLevelEditor;
 
 void* gameLevelEditorInit();

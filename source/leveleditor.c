@@ -7,11 +7,14 @@
 extern HeroCore* core;
 
 static void levelEditorclose(void**ptr);
-static void constructToolWidget(GameLevelEditor* levelEditor);
 static void update(GameLevelEditor* levelEditor);
 static void draw(GameLevelEditor* levelEditor);
+
 static void loadBricksInfo(GameLevelEditor* levelEditor);
 static void selectBrick(GameLevelEditor* levelEditor, uint32_t index);
+
+static void constructToolWidget(GameLevelEditor* levelEditor);
+static void constructMainWidget(GameLevelEditor* levelEditor);
 
 static void newBtnClick(void* arg);
 static void saveBtnClick(void* arg);
@@ -34,6 +37,9 @@ void* gameLevelEditorInit()
   levelEditor->mainWindow = heroCoreModuleGet(core, "window");
   levelEditor->mainSdlWindow = heroWindowGetSdlWindow(levelEditor->mainWindow);
   heroWindowSetBackgroundColor(levelEditor->mainWindow, (HeroColor){0,255,0,255});
+  glEnable( GL_BLEND );
+  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+  heroWindowSetBackgroundColor(levelEditor->mainWindow, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
   levelEditor->mainSpriteBatch = heroSpriteBatchInit(levelEditor->mainWindow, 10, 10, levelEditor->shader);
 
@@ -61,7 +67,6 @@ void gameLevelEditorUpdate(void* ptr)
   update(levelEditor);
 
   draw(levelEditor);
-
 }
 
 void gameLevelEditorDestroy(void* ptr)
@@ -139,6 +144,7 @@ static void draw(GameLevelEditor* levelEditor)
 
     heroSpriteBatchBegin(levelEditor->mainSpriteBatch);
 
+    uiWidgetDraw(levelEditor->mainWidget, levelEditor->mainSpriteBatch);
 
     heroSpriteBatchEnd(levelEditor->mainSpriteBatch);
 
@@ -242,6 +248,11 @@ static void constructToolWidget(GameLevelEditor* levelEditor)
   heroFontUnload(font);
 }
 
+static void constructMainWidget(GameLevelEditor* levelEditor)
+{
+
+}
+
 static void loadBricksInfo(GameLevelEditor* levelEditor)
 {
   levelEditor->infoText = (char**)malloc(
@@ -315,6 +326,7 @@ static void openBtnClick(void* arg)
 
 static void exitBtnClick(void* arg)
 {
+  printf("[Level editor] Editor closed\n");
   GameState* state = heroCoreModuleGet(core, "state");
   gameStateChange(state, GAMESTATE_MENU);
 }

@@ -59,3 +59,9 @@ HeroInt4 gameSpriteSheetGetRect(GameSpriteSheet* spriteSheet, GameSpriteSheetInd
 {
   return spriteSheet->rects[index];
 }
+
+HeroInt4 gameSpriteSheetGetRectByName(GameSpriteSheet* spriteSheet, const char* name)
+{
+  GameSpriteSheetIndex index = gameSpriteSheetGet(spriteSheet, name);
+  return gameSpriteSheetGetRect(spriteSheet, index);
+}
