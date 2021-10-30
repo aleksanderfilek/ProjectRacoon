@@ -9,16 +9,6 @@ OBJECTS = *.o
 BUILDDIR = lib/windows
 TARGET = main
 
-# HEADERDIR = include
-# SOURCEDIR = source
-
-# TARGET = main
-# CC = gcc
-# INC = -Iinclude
-
-# SOURCES = $(wildcard $(SOURCEDIR)/*.c)
-# OBJECTS = $(patsubst $(SOURCEDIR)/%.c, ./%.o, $(SOURCES))
-
 ifeq ($(OS),windows)
 	RM = del /F /Q
 	RMDIR = rmdir /S /Q
