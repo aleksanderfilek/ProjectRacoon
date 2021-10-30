@@ -1,61 +1,81 @@
-PROJDIR = $(realpath $(CURDIR))
-HEADERDIR = include
-SOURCEDIR = source
+OS ?= windows
 
-TARGET = main
 CC = gcc
-INC = -Iinclude
+TARGET = libhero
+INCDIR = include
+LIBDIR = lib
+SOURCES = source/*.c
+OBJECTS = *.o
+BUILDDIR = lib/windows
+TARGET = main
 
-SOURCES = $(wildcard $(SOURCEDIR)/*.c)
-OBJECTS = $(patsubst $(SOURCEDIR)/%.c, ./%.o, $(SOURCES))
+# HEADERDIR = include
+# SOURCEDIR = source
 
-ifeq ($(OS),Windows_NT)
+# TARGET = main
+# CC = gcc
+# INC = -Iinclude
+
+# SOURCES = $(wildcard $(SOURCEDIR)/*.c)
+# OBJECTS = $(patsubst $(SOURCEDIR)/%.c, ./%.o, $(SOURCES))
+
+ifeq ($(OS),windows)
 	RM = del /F /Q
 	RMDIR = rmdir /S /Q
 	MKDIR = mkdir
 	COPY = xcopy /s /e
 	IFEXIST = if exist
 	LIBDIR = lib/windows
-	LIBS = -Llib/windows -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
+	LIBS = -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
 	EXTENSION = .exe
 else
 	OS = linux
 	RM = rm -rf
 	RMDIR = rm -rf
 	MKDIR = mkdir -p
-	IFEXIST = 
 	COPY = cp -R
-	LIBDIR = lib/linux
-	LIBS = -Llib/linux -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
-	EXTENSION = 
+	LIBDIR = lib
+	LIBS = -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
 endif
 
-debug: clearDebug buildDebug clean
-release: clearRelease buildRelease clean
-runDebug: 
-	build/debug/$(OS)/$(TARGET)$(EXTENSION)
-runRelease: 
-	build/release/$(OS)/$(TARGET)$(EXTENSION)
+build: clear pack compile link clean
 
-buildDebug:
+pack:
+ifeq ($(OS),windows)
+
+else
 	$(MKDIR) build/debug/$(OS)/assets
-	$(COPY) assets build/debug/$(OS)
-	$(COPY) $(LIBDIR) build/debug
-	$(CC) $(INC) -D DEBUG -c $(SOURCES)
-	$(CC) $(INC) -D DEBUG -o build/debug/$(OS)/$(TARGET) $(OBJECTS) $(LIBS)
+	$(COPY) assets build/debug/$(OS)/assets
+	$(COPY) $(LIBDIR)/linux build/debug
+endif
 
-buildRelease:
-	$(MKDIR) build/release/$(OS)/assets
-	$(COPY) assets build/release/$(OS)/assets
-	$(COPY) $(LIBDIR) build/release/$(OS)
-	$(CC) $(INC) -O3 -c $(SOURCES)
-	$(CC) $(INC) -O3 -mwindows -o build/release/$(OS)/$(TARGET) $(OBJECTS) $(LIBS)
+compile:
+ifeq ($(OS),windows)
 
-clearDebug:
+else
+	$(CC) -D DEBUG -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
+endif
+
+link:
+ifeq ($(OS),windows)
+
+else
+	$(CC) -D DEBUG -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/debug/linux/$(TARGET) $(OBJECTS)  $(LIBS)
+endif
+
+clear:
+ifeq ($(OS),windows)
+	$(IFEXIST) build/debug/$(OS) $(RMDIR) build/debug/$(OS)
+else
 	$(RMDIR) build/debug/$(OS)
-
-clearRelease:
-	$(IFEXIST) build/release/$(OS) $(RMDIR) build/release/$(OS)
+endif
 
 clean:
 	$(RM) *.o
+
+run:
+ifeq ($(OS),windows)
+
+else
+	./build/debug/$(OS)/$(TARGET)
+endif
