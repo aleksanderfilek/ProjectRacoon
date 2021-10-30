@@ -43,14 +43,14 @@ compile:
 ifeq ($(OS),windows)
 
 else
-	$(CC) -D DEBUG -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
+	$(CC) -g -D DEBUG -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
 endif
 
 link:
 ifeq ($(OS),windows)
 
 else
-	$(CC) -D DEBUG -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/debug/linux/$(TARGET) $(OBJECTS)  $(LIBS)
+	$(CC) -g -D DEBUG -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/debug/linux/$(TARGET) $(OBJECTS)  $(LIBS)
 endif
 
 clear:

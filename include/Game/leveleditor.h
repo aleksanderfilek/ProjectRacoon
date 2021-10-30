@@ -8,9 +8,7 @@
 #include"Game/state.h"
 #include"Game/spritesheet.h"
 #include"Game/ui.h"
-
-#define BRICKS_COLUMNS 25
-#define BRICKS_ROWS 10
+#include"Game/play.h"
 
 typedef struct
 {
@@ -26,19 +24,26 @@ typedef struct
   HeroShader* shader;
 
   GameSpriteSheet* levelEditorSpriteSheet;
-  GameSpriteSheet* brickSpriteSheet;
+
   char** infoText;
   UIWidget* toolWidget;
   UIWidget* mainWidget;
   
+  char title[64];
   bool changed;
   uint32_t currentBrick;
+  char* currentPath;
+  HeroInt4 emptyBrickRect;
 
-  uint8_t bricks[BRICKS_ROWS * BRICKS_COLUMNS];
+  GamePlay* play;
 } GameLevelEditor;
 
 void* gameLevelEditorInit();
 void gameLevelEditorUpdate(void* ptr);
 void gameLevelEditorDestroy(void* ptr);
+
+void gameDrawMain(GameLevelEditor* levelEditor);
+
+void gameSave(GameLevelEditor* levelEditor);
 
 #endif

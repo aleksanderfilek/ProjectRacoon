@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
   core = heroCoreInit();
 
   {
-    void* window = heroWindowInit("window", 1280, 720, 0);
+    void* window = heroWindowInit("ProjectRacoon", 1280, 720, 0);
     heroWindowSetEvent((HeroWindow*)window, HERO_WINDOW_CLOSE, gameClose);
     heroCoreModuleAdd(core, "window", window, NULL, heroWindowDestroy);
 

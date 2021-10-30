@@ -1,4 +1,5 @@
 #include"Game/leveleditor.h"
+#include"Game/leveleditorWidget.h"
 
 #include<stdio.h>
 #include<stdlib.h>
@@ -11,29 +12,29 @@ extern HeroCore* core;
 static void levelEditorclose(void**ptr);
 static void update(GameLevelEditor* levelEditor);
 static void draw(GameLevelEditor* levelEditor);
+static void drawTool(GameLevelEditor* levelEditor);
 
 static void loadBricksInfo(GameLevelEditor* levelEditor);
 static void selectBrick(GameLevelEditor* levelEditor, uint32_t index);
-
-static void constructToolWidget(GameLevelEditor* levelEditor);
-static void constructMainWidget(GameLevelEditor* levelEditor);
-
-static void newBtnClick(void* arg);
-static void saveBtnClick(void* arg);
-static void openBtnClick(void* arg);
-static void exitBtnClick(void* arg);
 
 void* gameLevelEditorInit()
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)malloc(sizeof(GameLevelEditor));
   levelEditor->changed = false;
   levelEditor->currentBrick = 0;
+  levelEditor->currentPath = NULL;
+  strcat(levelEditor->title, "ProjectRacoon - LevelEditor");
+
+  levelEditor->play = (GamePlay*)malloc(sizeof(GamePlay));
+  memset(levelEditor->play->bricks, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
+
 
   levelEditor->input = heroCoreModuleGet(core, "input");
 
   levelEditor->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
   levelEditor->levelEditorSpriteSheet = gameSpriteSheetLoad("assets/debug/LevelEditor.he");
-  levelEditor->brickSpriteSheet = gameSpriteSheetLoad("assets/sprites/Bricks.he");
+  levelEditor->emptyBrickRect = gameSpriteSheetGetRectByName(levelEditor->levelEditorSpriteSheet, "emptyBrick");
+  levelEditor->play->brickSpriteSheet = gameSpriteSheetLoad("assets/sprites/Bricks.he");
   loadBricksInfo(levelEditor);
 
   levelEditor->mainWindow = heroCoreModuleGet(core, "window");
@@ -44,9 +45,9 @@ void* gameLevelEditorInit()
   heroWindowSetBackgroundColor(levelEditor->mainWindow, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
   levelEditor->mainSpriteBatch = heroSpriteBatchInit(levelEditor->mainWindow, 10, 10, levelEditor->shader);
+  levelEditor->play->spriteBatch = levelEditor->mainSpriteBatch;
 
-
-  levelEditor->toolWindow = heroWindowInit("LevelEditorTools", 640, 480, 0);
+  levelEditor->toolWindow = heroWindowInit(levelEditor->title, 640, 480, 0);
   glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   heroWindowSetBackgroundColor(levelEditor->toolWindow, (HeroColor){0x1E,0x1E,0x1E,0xFF});
@@ -58,6 +59,7 @@ void* gameLevelEditorInit()
   levelEditor->toolSpriteBatch = heroSpriteBatchInit(levelEditor->toolWindow, 10, 10, levelEditor->shader);
 
   constructToolWidget(levelEditor);
+  constructMainWidget(levelEditor);
 
   return levelEditor;
 }
@@ -77,13 +79,13 @@ void gameLevelEditorDestroy(void* ptr)
 
   uiWidgetDestroy(levelEditor->toolWidget);
 
-  for(int i = 1; i <= levelEditor->brickSpriteSheet->length; i++)
+  for(int i = 1; i <= levelEditor->play->brickSpriteSheet->length; i++)
   {
     free(levelEditor->infoText[i]);
   }
 
   gameSpriteSheetUnload(levelEditor->levelEditorSpriteSheet);
-  gameSpriteSheetUnload(levelEditor->brickSpriteSheet);
+  gameSpriteSheetUnload(levelEditor->play->brickSpriteSheet);
 
   heroShaderUnload(levelEditor->shader);
   heroSpriteBatchDestroy(levelEditor->toolSpriteBatch);
@@ -112,7 +114,7 @@ static void update(GameLevelEditor* levelEditor)
       int iX = normX / 50;
       int iY = normY / 24;
       int index = 10 * iY + iX + 1;
-      if(index > levelEditor->brickSpriteSheet->length)
+      if(index > levelEditor->play->brickSpriteSheet->length)
       {
         index = 0;
       }
@@ -120,38 +122,94 @@ static void update(GameLevelEditor* levelEditor)
       selectBrick(levelEditor, index);
     }
   }
+  else if(levelEditor->currentPath != NULL && heroWindowIsFocused(levelEditor->mainWindow) == true)
+  {
+    uiWidgetUpdate(levelEditor->mainWidget, levelEditor->input);
+
+    int mouseX, mouseY;
+    heroInputGetMousePosition(levelEditor->input, &mouseX, &mouseY);
+    bool leftMouseClick = heroInputMouseButtonDown(levelEditor->input, HERO_MOUSE_LEFT);
+    if(leftMouseClick == true && mouseX > 15 && mouseX < 1265 && mouseY > 15 && mouseY < 303)
+    {
+      int normX = mouseX - 15;
+      int normY = mouseY - 15;
+      int iX = normX / 50;
+      int iY = normY / 24;
+      int index = 25 * iY + iX;
+      levelEditor->play->bricks[index] = levelEditor->currentBrick;
+
+      levelEditor->changed = true;
+
+      levelEditor->title[strlen(levelEditor->title) - 1] = '*';
+      heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
+    }
+  }
+
+  if(levelEditor->changed == true && 
+    heroInputKeyPressed(levelEditor->input, HERO_KEYCODE_LCTRL) == true &&
+    heroInputKeyDown(levelEditor->input, HERO_KEYCODE_S) == true)
+  {
+    gameSave(levelEditor);
+  }
 }
 
 static void draw(GameLevelEditor* levelEditor)
 {
   if(heroWindowIsFocused(levelEditor->toolWindow) == true)
   {
-    heroWindowSetCurrentContext( levelEditor->toolWindow );
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    heroSpriteBatchBegin(levelEditor->toolSpriteBatch);
-
-    uiWidgetDraw(levelEditor->toolWidget, levelEditor->toolSpriteBatch);
-
-    heroSpriteBatchEnd(levelEditor->toolSpriteBatch);
-
-    SDL_GL_SwapWindow(levelEditor->toolSdlWindow);
+    drawTool(levelEditor);
   }
   else if(heroWindowIsFocused(levelEditor->mainWindow) == true)
   {
-    heroWindowSetCurrentContext( levelEditor->mainWindow );
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    heroSpriteBatchBegin(levelEditor->mainSpriteBatch);
-
-    //uiWidgetDraw(levelEditor->mainWidget, levelEditor->mainSpriteBatch);
-
-    heroSpriteBatchEnd(levelEditor->mainSpriteBatch);
-
-    SDL_GL_SwapWindow(levelEditor->mainSdlWindow);
+    gameDrawMain(levelEditor);
   }
+}
+
+static void drawTool(GameLevelEditor* levelEditor)
+{
+  heroWindowSetCurrentContext( levelEditor->toolWindow );
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  heroSpriteBatchBegin(levelEditor->toolSpriteBatch);
+
+  uiWidgetDraw(levelEditor->toolWidget, levelEditor->toolSpriteBatch);
+
+  heroSpriteBatchEnd(levelEditor->toolSpriteBatch);
+
+  SDL_GL_SwapWindow(levelEditor->toolSdlWindow);
+}
+
+void gameDrawMain(GameLevelEditor* levelEditor)
+{
+  heroWindowSetCurrentContext( levelEditor->mainWindow );
+
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  heroSpriteBatchBegin(levelEditor->mainSpriteBatch);
+
+  for(int y = 0; y < BRICKS_ROWS; y++)
+  {
+    for(int x = 0; x < BRICKS_COLUMNS; x++)
+    {
+      int index = BRICKS_COLUMNS*y + x;
+      if(levelEditor->play->bricks[index] > 0)
+      {
+        continue;
+      }
+
+      HeroInt2 position = { 15 + 50*x, 15 + 24*y };
+      heroSpriteBatchDrawTextureEx(levelEditor->mainSpriteBatch, levelEditor->levelEditorSpriteSheet->texture,
+        position, (HeroInt2){50, 24}, levelEditor->emptyBrickRect, 0.0f, (HeroColor){0xFF,0xFF,0xFF,0xFF});
+    }
+  }
+
+  gamePlayBricksDraw(levelEditor->play);
+  uiWidgetDraw(levelEditor->mainWidget, levelEditor->mainSpriteBatch);
+
+  heroSpriteBatchEnd(levelEditor->mainSpriteBatch);
+
+  SDL_GL_SwapWindow(levelEditor->mainSdlWindow);
 }
 
 static void levelEditorclose(void** ptr)
@@ -160,106 +218,11 @@ static void levelEditorclose(void** ptr)
   gameStateChange(state, GAMESTATE_MENU);
 }
 
-static void constructToolWidget(GameLevelEditor* levelEditor)
-{
-  levelEditor->toolWidget = uiWidgetCreate();
-
-  levelEditor->toolWidget->buttonNumber = 4;
-  levelEditor->toolWidget->buttons = (UIButton**)malloc(levelEditor->toolWidget->buttonNumber * sizeof(UIButton*));
-  HeroInt4 normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "newBtnD"));
-  HeroInt4 highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "newBtnH"));
-  levelEditor->toolWidget->buttons[0] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){30,0}, (HeroInt2){normal.z,normal.w});
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[0],UIBUTTONSTATE_NORMAL,normal);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[0],UIBUTTONSTATE_HOVER,highlight);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[0],UIBUTTONSTATE_CLICK,highlight);
-  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[0], newBtnClick, NULL);
-
-  normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "saveBtnD"));
-  highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "saveBtnH"));
-  levelEditor->toolWidget->buttons[1] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){normal.x + 30,0}, (HeroInt2){normal.z - normal.x, normal.w});
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[1],UIBUTTONSTATE_NORMAL,normal);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[1],UIBUTTONSTATE_HOVER,highlight);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[1],UIBUTTONSTATE_CLICK,highlight);
-  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[1], saveBtnClick, NULL);
-
-  normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "openBtnD"));
-  highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "openBtnH"));
-  levelEditor->toolWidget->buttons[2] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){normal.x + 30,0}, (HeroInt2){normal.z - normal.x, normal.w});
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[2],UIBUTTONSTATE_NORMAL,normal);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[2],UIBUTTONSTATE_HOVER,highlight);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[2],UIBUTTONSTATE_CLICK,highlight);
-  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[2], openBtnClick, NULL);
-
-  normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "exitBtnD"));
-  highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "exitBtnH"));
-  levelEditor->toolWidget->buttons[3] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){normal.x + 30,0}, (HeroInt2){normal.z - normal.x, normal.w});
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[3],UIBUTTONSTATE_NORMAL,normal);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[3],UIBUTTONSTATE_HOVER,highlight);
-  uiButtonSetStateRect(levelEditor->toolWidget->buttons[3],UIBUTTONSTATE_CLICK,highlight);
-  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[3], exitBtnClick, NULL);
-
-  levelEditor->toolWidget->imageNumber = 6;
-  levelEditor->toolWidget->images = (UIImage**)malloc(levelEditor->toolWidget->imageNumber * sizeof(UIImage*));
-  levelEditor->toolWidget->images[0] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){0,0}, (HeroInt2){30,30});
-  uiImageSetRect(levelEditor->toolWidget->images[0], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "logo")));
-  levelEditor->toolWidget->images[1] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){65,95}, (HeroInt2){510,250});
-  uiImageSetRect(levelEditor->toolWidget->images[1], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "panel")));
-  levelEditor->toolWidget->images[2] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){0,420}, (HeroInt2){640,60});
-  uiImageSetRect(levelEditor->toolWidget->images[2], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "panel")));
-  levelEditor->toolWidget->images[3] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){normal.z+30,0}, (HeroInt2){640-normal.z,30});
-  uiImageSetRect(levelEditor->toolWidget->images[3], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "panel")));
-  levelEditor->toolWidget->images[4] = uiImageCreate(levelEditor->brickSpriteSheet->texture,
-    (HeroInt2){70,100}, (HeroInt2){500,240});
-  levelEditor->toolWidget->images[5] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){70,100}, (HeroInt2){50,24});
-  uiImageSetRect(levelEditor->toolWidget->images[5], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
-    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "highlight")));
-  levelEditor->toolWidget->images[5]->visible = false;
-
-  levelEditor->toolWidget->labelNumber = levelEditor->brickSpriteSheet->length + 1;
-  levelEditor->toolWidget->labels = (UILabel**)malloc(levelEditor->toolWidget->labelNumber * sizeof(UILabel*));
-  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 18);
-  for(int i = 0; i <= levelEditor->brickSpriteSheet->length; i++)
-  {
-    levelEditor->toolWidget->labels[i] = uiLabelCreate(levelEditor->infoText[i], font, (HeroColor){255,255,255,255},
-     UIALLIGMENT_TOPLEFT, (HeroInt2){5,425}, (HeroInt2){630,50});
-    levelEditor->toolWidget->labels[i]->visible = false;
-  }
-  levelEditor->toolWidget->labels[0]->visible = true;
-
-  heroFontUnload(font);
-}
-
-static void constructMainWidget(GameLevelEditor* levelEditor)
-{
-
-}
-
 static void loadBricksInfo(GameLevelEditor* levelEditor)
 {
   levelEditor->infoText = (char**)malloc(
-    (levelEditor->brickSpriteSheet->length + 1) * sizeof(char*));
-  memset(levelEditor->infoText, 0, (levelEditor->brickSpriteSheet->length + 1) * sizeof(char*));
+    (levelEditor->play->brickSpriteSheet->length + 1) * sizeof(char*));
+  memset(levelEditor->infoText, 0, (levelEditor->play->brickSpriteSheet->length + 1) * sizeof(char*));
   levelEditor->infoText[0] = "None";
 
   FILE* file = fopen("assets/debug/BricksInfo.txt", "r");
@@ -270,7 +233,7 @@ static void loadBricksInfo(GameLevelEditor* levelEditor)
   }
 
   size_t bufferSize;
-  for(int i = 1; i <= levelEditor->brickSpriteSheet->length; i++)
+  for(int i = 1; i <= levelEditor->play->brickSpriteSheet->length; i++)
   {
     getline(&levelEditor->infoText[i], &bufferSize, file);
     uint32_t lastChar = strlen(levelEditor->infoText[i]) - 1;
@@ -311,27 +274,15 @@ static void selectBrick(GameLevelEditor* levelEditor, uint32_t index)
   printf("[Level editor] Brick selection: %d\n", levelEditor->currentBrick);
 }
 
-static void newBtnClick(void* arg)
+void gameSave(GameLevelEditor* levelEditor)
 {
-  printf("new click\n");
-}
+  FILE* file = fopen(levelEditor->currentPath, "wb");
 
-static void saveBtnClick(void* arg)
-{
-  printf("save click\n");
-}
+  fwrite(levelEditor->play->bricks, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
 
-static void openBtnClick(void* arg)
-{
-  char const * lFilterPatterns[2] = { "*.txt", "*.text" };
-  char* filePath = heroFileDialogOpen("Select file", "", 2, lFilterPatterns, NULL, 0);
+  fclose(file);
 
-  printf("%s\n",filePath);
-}
-
-static void exitBtnClick(void* arg)
-{
-  printf("[Level editor] Editor closed\n");
-  GameState* state = heroCoreModuleGet(core, "state");
-  gameStateChange(state, GAMESTATE_MENU);
+  levelEditor->changed = false;
+  levelEditor->title[strlen(levelEditor->title) - 1] = ' ';
+  heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
 }
