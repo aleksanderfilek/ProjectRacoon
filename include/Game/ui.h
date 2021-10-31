@@ -75,6 +75,7 @@ void uiLabelDestroy(UILabel* label);
 
 typedef struct
 {
+  bool visible;
   UIButton** buttons;
   uint32_t buttonNumber;
   UIImage** images;

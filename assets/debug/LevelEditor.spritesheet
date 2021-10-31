@@ -11,3 +11,11 @@ logo 0 60 30 90
 panel 30 60 60 90
 highlight 60 60 110 84
 emptyBrick 110 60 160 84
+playBtnD 160 60 190 90
+playBtnH 190 60 220 90
+stopBtnD 220 60 250 90
+stopBtnH 250 60 280 90
+yesD 0 90 50 120
+yesH 50 90 100 120
+noD 100 90 150 120
+noH 150 90 200 120

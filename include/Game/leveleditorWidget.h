@@ -4,6 +4,6 @@
 #include"Game/leveleditor.h"
 
 void constructToolWidget(GameLevelEditor* levelEditor);
-void constructMainWidget(GameLevelEditor* levelEditor);
+void constructSaveWidget(GameLevelEditor* levelEditor);
 
 #endif

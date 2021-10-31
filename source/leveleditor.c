@@ -24,6 +24,7 @@ void* gameLevelEditorInit()
   levelEditor->currentBrick = 0;
   levelEditor->currentPath = NULL;
   strcat(levelEditor->title, "ProjectRacoon - LevelEditor");
+  levelEditor->playing = false;
 
   levelEditor->play = (GamePlay*)malloc(sizeof(GamePlay));
   memset(levelEditor->play->bricks, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
@@ -44,7 +45,7 @@ void* gameLevelEditorInit()
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
   heroWindowSetBackgroundColor(levelEditor->mainWindow, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
-  levelEditor->mainSpriteBatch = heroSpriteBatchInit(levelEditor->mainWindow, 10, 10, levelEditor->shader);
+  levelEditor->mainSpriteBatch = heroSpriteBatchInit(levelEditor->mainWindow, 100, 32, levelEditor->shader);
   levelEditor->play->spriteBatch = levelEditor->mainSpriteBatch;
 
   levelEditor->toolWindow = heroWindowInit(levelEditor->title, 640, 480, 0);
@@ -56,10 +57,10 @@ void* gameLevelEditorInit()
   HeroEvent* event = heroCoreModuleGet(core, "event");
   heroEventAddWindow(event, levelEditor->toolWindow);
 
-  levelEditor->toolSpriteBatch = heroSpriteBatchInit(levelEditor->toolWindow, 10, 10, levelEditor->shader);
+  levelEditor->toolSpriteBatch = heroSpriteBatchInit(levelEditor->toolWindow, 100, 32, levelEditor->shader);
 
   constructToolWidget(levelEditor);
-  constructMainWidget(levelEditor);
+  constructSaveWidget(levelEditor);
 
   return levelEditor;
 }
@@ -103,6 +104,7 @@ static void update(GameLevelEditor* levelEditor)
   if(heroWindowIsFocused(levelEditor->toolWindow) == true)
   {
     uiWidgetUpdate(levelEditor->toolWidget, levelEditor->input);
+    uiWidgetUpdate(levelEditor->saveWidget, levelEditor->input);
 
     int mouseX, mouseY;
     heroInputGetMousePosition(levelEditor->input, &mouseX, &mouseY);
@@ -124,11 +126,11 @@ static void update(GameLevelEditor* levelEditor)
   }
   else if(levelEditor->currentPath != NULL && heroWindowIsFocused(levelEditor->mainWindow) == true)
   {
-    uiWidgetUpdate(levelEditor->mainWidget, levelEditor->input);
 
     int mouseX, mouseY;
     heroInputGetMousePosition(levelEditor->input, &mouseX, &mouseY);
     bool leftMouseClick = heroInputMouseButtonDown(levelEditor->input, HERO_MOUSE_LEFT);
+    bool ctrlMouseClick = heroInputKeyPressed(levelEditor->input, HERO_KEYCODE_LCTRL);
     if(leftMouseClick == true && mouseX > 15 && mouseX < 1265 && mouseY > 15 && mouseY < 303)
     {
       int normX = mouseX - 15;
@@ -136,7 +138,7 @@ static void update(GameLevelEditor* levelEditor)
       int iX = normX / 50;
       int iY = normY / 24;
       int index = 25 * iY + iX;
-      levelEditor->play->bricks[index] = levelEditor->currentBrick;
+      levelEditor->play->bricks[index] = (ctrlMouseClick == false)? levelEditor->currentBrick : 0;
 
       levelEditor->changed = true;
 
@@ -174,6 +176,7 @@ static void drawTool(GameLevelEditor* levelEditor)
   heroSpriteBatchBegin(levelEditor->toolSpriteBatch);
 
   uiWidgetDraw(levelEditor->toolWidget, levelEditor->toolSpriteBatch);
+  uiWidgetDraw(levelEditor->saveWidget, levelEditor->toolSpriteBatch);
 
   heroSpriteBatchEnd(levelEditor->toolSpriteBatch);
 
@@ -188,24 +191,29 @@ void gameDrawMain(GameLevelEditor* levelEditor)
 
   heroSpriteBatchBegin(levelEditor->mainSpriteBatch);
 
-  for(int y = 0; y < BRICKS_ROWS; y++)
+  if(levelEditor->playing == false)
   {
-    for(int x = 0; x < BRICKS_COLUMNS; x++)
+    for(int y = 0; y < BRICKS_ROWS; y++)
     {
-      int index = BRICKS_COLUMNS*y + x;
-      if(levelEditor->play->bricks[index] > 0)
+      for(int x = 0; x < BRICKS_COLUMNS; x++)
       {
-        continue;
+        int index = BRICKS_COLUMNS*y + x;
+        if(levelEditor->play->bricks[index] > 0)
+        {
+          continue;
+        }
+
+        HeroInt2 position = { 15 + 50*x, 15 + 24*y };
+        heroSpriteBatchDrawTextureEx(levelEditor->mainSpriteBatch, levelEditor->levelEditorSpriteSheet->texture,
+          position, (HeroInt2){50, 24}, levelEditor->emptyBrickRect, 0.0f, (HeroColor){0xFF,0xFF,0xFF,0xFF});
       }
-
-      HeroInt2 position = { 15 + 50*x, 15 + 24*y };
-      heroSpriteBatchDrawTextureEx(levelEditor->mainSpriteBatch, levelEditor->levelEditorSpriteSheet->texture,
-        position, (HeroInt2){50, 24}, levelEditor->emptyBrickRect, 0.0f, (HeroColor){0xFF,0xFF,0xFF,0xFF});
     }
+    gamePlayBricksDraw(levelEditor->play);
   }
+  else
+  {
 
-  gamePlayBricksDraw(levelEditor->play);
-  uiWidgetDraw(levelEditor->mainWidget, levelEditor->mainSpriteBatch);
+  }
 
   heroSpriteBatchEnd(levelEditor->mainSpriteBatch);
 

@@ -1,6 +1,7 @@
 #include"Game/leveleditorWidget.h"
 
 #include<stdlib.h>
+#include<stdbool.h>
 
 extern HeroCore* core;
 
@@ -8,6 +9,9 @@ static void newBtnClick(void* arg);
 static void saveBtnClick(void* arg);
 static void openBtnClick(void* arg);
 static void exitBtnClick(void* arg);
+static void gameBtnClick(void* arg);
+static void saveYesBtnClick(void* arg);
+static void saveNoBtnClick(void* arg);
 
 static void updateTitle(GameLevelEditor* levelEditor);
 
@@ -15,7 +19,7 @@ void constructToolWidget(GameLevelEditor* levelEditor)
 {
   levelEditor->toolWidget = uiWidgetCreate();
 
-  levelEditor->toolWidget->buttonNumber = 4;
+  levelEditor->toolWidget->buttonNumber = 5;
   levelEditor->toolWidget->buttons = (UIButton**)malloc(levelEditor->toolWidget->buttonNumber * sizeof(UIButton*));
   HeroInt4 normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
     gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "newBtnD"));
@@ -59,7 +63,20 @@ void constructToolWidget(GameLevelEditor* levelEditor)
   uiButtonSetStateRect(levelEditor->toolWidget->buttons[3],UIBUTTONSTATE_NORMAL,normal);
   uiButtonSetStateRect(levelEditor->toolWidget->buttons[3],UIBUTTONSTATE_HOVER,highlight);
   uiButtonSetStateRect(levelEditor->toolWidget->buttons[3],UIBUTTONSTATE_CLICK,highlight);
-  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[3], exitBtnClick, NULL);
+  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[3], exitBtnClick, levelEditor);
+
+  int panelPosx = normal.z;
+
+  normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "playBtnD"));
+  highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "playBtnH"));
+  levelEditor->toolWidget->buttons[4] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
+    (HeroInt2){610,0}, (HeroInt2){30, 30});
+  uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_NORMAL,normal);
+  uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_HOVER,highlight);
+  uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_CLICK,highlight);
+  uiButtonSetClickFunc(levelEditor->toolWidget->buttons[4], gameBtnClick, levelEditor);
 
   levelEditor->toolWidget->imageNumber = 6;
   levelEditor->toolWidget->images = (UIImage**)malloc(levelEditor->toolWidget->imageNumber * sizeof(UIImage*));
@@ -76,7 +93,7 @@ void constructToolWidget(GameLevelEditor* levelEditor)
   uiImageSetRect(levelEditor->toolWidget->images[2], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
     gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "panel")));
   levelEditor->toolWidget->images[3] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
-    (HeroInt2){normal.z+30,0}, (HeroInt2){640-normal.z,30});
+    (HeroInt2){panelPosx+30,0}, (HeroInt2){580-panelPosx,30});
   uiImageSetRect(levelEditor->toolWidget->images[3], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
     gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "panel")));
   levelEditor->toolWidget->images[4] = uiImageCreate(levelEditor->play->brickSpriteSheet->texture,
@@ -101,15 +118,64 @@ void constructToolWidget(GameLevelEditor* levelEditor)
   heroFontUnload(font);
 }
 
-void constructMainWidget(GameLevelEditor* levelEditor)
+void constructSaveWidget(GameLevelEditor* levelEditor)
 {
-  levelEditor->mainWidget = uiWidgetCreate();
+  levelEditor->saveWidget = uiWidgetCreate();
+  levelEditor->saveWidget->visible = false;
 
+  levelEditor->saveWidget->buttonNumber = 2;
+  levelEditor->saveWidget->buttons = (UIButton**)malloc(levelEditor->saveWidget->buttonNumber * sizeof(UIButton*));
+  HeroInt4 normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "yesD"));
+  HeroInt4 highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "yesH"));
+  levelEditor->saveWidget->buttons[0] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
+    (HeroInt2){180,250}, (HeroInt2){50,30});
+  uiButtonSetStateRect(levelEditor->saveWidget->buttons[0],UIBUTTONSTATE_NORMAL,normal);
+  uiButtonSetStateRect(levelEditor->saveWidget->buttons[0],UIBUTTONSTATE_HOVER,highlight);
+  uiButtonSetStateRect(levelEditor->saveWidget->buttons[0],UIBUTTONSTATE_CLICK,highlight);
+  uiButtonSetClickFunc(levelEditor->saveWidget->buttons[0], saveYesBtnClick, NULL);
+
+  normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "noD"));
+  highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+    gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "noH"));
+  levelEditor->saveWidget->buttons[1] = uiButtonCreate(levelEditor->levelEditorSpriteSheet->texture,
+    (HeroInt2){410,250}, (HeroInt2){50,30});
+  uiButtonSetStateRect(levelEditor->saveWidget->buttons[1],UIBUTTONSTATE_NORMAL,normal);
+  uiButtonSetStateRect(levelEditor->saveWidget->buttons[1],UIBUTTONSTATE_HOVER,highlight);
+  uiButtonSetStateRect(levelEditor->saveWidget->buttons[1],UIBUTTONSTATE_CLICK,highlight);
+  uiButtonSetClickFunc(levelEditor->saveWidget->buttons[1], saveNoBtnClick, NULL);
+
+  levelEditor->saveWidget->imageNumber = 1;
+  levelEditor->saveWidget->images = (UIImage**)malloc(levelEditor->saveWidget->imageNumber * sizeof(UIImage*));
+  levelEditor->saveWidget->images[0] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
+      (HeroInt2){170,190}, (HeroInt2){300,100});
+  uiImageSetRect(levelEditor->saveWidget->images[0], 
+    gameSpriteSheetGetRectByName(levelEditor->levelEditorSpriteSheet, "panel"));
+
+  levelEditor->saveWidget->labelNumber = 1;
+  levelEditor->saveWidget->labels = (UILabel**)malloc(levelEditor->saveWidget->labelNumber * sizeof(UILabel*));
+  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 18);
+  levelEditor->saveWidget->labels[0] = uiLabelCreate("Save?",font,(HeroColor){0xFF,0xFF,0xFF,0xFF},
+    UIALLIGMENT_CENTER, (HeroInt2){170,190}, (HeroInt2){300,60});
+  heroFontUnload(font);
 }
 
 static void newBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
+
+  if(levelEditor->changed == true)
+  {
+    levelEditor->saveWidget->visible = true;
+    void** args = (void**)malloc(2*sizeof(void*));
+    args[0] = levelEditor;
+    args[1] = (void*)newBtnClick;
+    uiButtonSetClickFunc(levelEditor->saveWidget->buttons[0], saveYesBtnClick, (void*)args);
+    uiButtonSetClickFunc(levelEditor->saveWidget->buttons[1], saveNoBtnClick, (void*)args);
+    return;
+  }
 
   char const * lFilterPatterns[1] = { "*.he" };
   char* filePath = heroFileSaveDialogOpen("New file", "levelname.he", 1, lFilterPatterns, NULL);
@@ -125,6 +191,7 @@ static void newBtnClick(void* arg)
   updateTitle(levelEditor);
   levelEditor->title[strlen(levelEditor->title) - 1] = ' ';
   heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
+  memset(levelEditor->play->bricks, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
 }
 
 static void saveBtnClick(void* arg)
@@ -142,11 +209,24 @@ static void saveBtnClick(void* arg)
   levelEditor->currentPath = filePath;
 
   gameSave(levelEditor);
+
+  updateTitle(levelEditor);
 }
 
 static void openBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
+
+  if(levelEditor->changed == true)
+  {
+    levelEditor->saveWidget->visible = true;
+    void** args = (void**)malloc(2*sizeof(void*));
+    args[0] = levelEditor;
+    args[1] = (void*)openBtnClick;
+    uiButtonSetClickFunc(levelEditor->saveWidget->buttons[0], saveYesBtnClick, (void*)args);
+    uiButtonSetClickFunc(levelEditor->saveWidget->buttons[1], saveNoBtnClick, (void*)args);
+    return;
+  }
 
   if(levelEditor->changed == true)
   {
@@ -179,9 +259,60 @@ static void openBtnClick(void* arg)
 
 static void exitBtnClick(void* arg)
 {
+  GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
+
+  if(levelEditor->changed == true)
+  {
+    levelEditor->saveWidget->visible = true;
+    void** args = (void**)malloc(2*sizeof(void*));
+    args[0] = levelEditor;
+    args[1] = (void*)exitBtnClick;
+    uiButtonSetClickFunc(levelEditor->saveWidget->buttons[0], saveYesBtnClick, (void*)args);
+    uiButtonSetClickFunc(levelEditor->saveWidget->buttons[1], saveNoBtnClick, (void*)args);
+    return;
+  }
+
   printf("[Level editor] Editor closed\n");
   GameState* state = heroCoreModuleGet(core, "state");
   gameStateChange(state, GAMESTATE_MENU);
+}
+
+static void gameBtnClick(void* arg)
+{
+  GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
+
+  if(levelEditor->currentPath == NULL)
+  {
+    printf("[Level editor] Trying to start empty level!\n");
+    return;
+  }
+
+  levelEditor->playing = !levelEditor->playing;
+
+  if(levelEditor->playing == true)
+  {
+    HeroInt4 normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+      gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "stopBtnD"));
+    HeroInt4 highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+      gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "stopBtnH"));
+
+    uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_NORMAL,normal);
+    uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_HOVER,highlight);
+    uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_CLICK,highlight);
+  }
+  else
+  {
+    HeroInt4 normal = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+      gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "playBtnD"));
+    HeroInt4  highlight = gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
+      gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "playBtnH"));
+
+    uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_NORMAL,normal);
+    uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_HOVER,highlight);
+    uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_CLICK,highlight);
+  }
+
+  gameDrawMain(levelEditor);
 }
 
 static void updateTitle(GameLevelEditor* levelEditor)
@@ -205,4 +336,44 @@ static void updateTitle(GameLevelEditor* levelEditor)
   heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
 
   free(pch);
+}
+
+static void saveYesBtnClick(void* arg)
+{
+  void** args = (void**)arg;
+  GameLevelEditor* levelEditor = (GameLevelEditor*)args[0];
+  void (*func)(void*arg);
+  func = args[1];
+
+  gameSave(levelEditor);
+
+  levelEditor->changed = false;
+
+  levelEditor->title[strlen(levelEditor->title) - 1] = ' ';
+  heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
+
+  levelEditor->saveWidget->visible = false;
+
+  func(levelEditor);
+
+  free(args);
+}
+
+static void saveNoBtnClick(void* arg)
+{
+  void** args = (void**)arg;
+  GameLevelEditor* levelEditor = (GameLevelEditor*)args[0];
+  void (*func)(void*arg);
+  func = args[1];
+
+  levelEditor->changed = false;
+
+  levelEditor->title[strlen(levelEditor->title) - 1] = ' ';
+  heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
+
+  levelEditor->saveWidget->visible = false;
+
+  func(levelEditor);
+
+  free(args);
 }

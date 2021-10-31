@@ -211,19 +211,28 @@ UIWidget* uiWidgetCreate()
 {
   UIWidget* widget = (UIWidget*)malloc(sizeof(UIWidget));
   memset(widget, 0, sizeof(UIWidget));
+  widget->visible = true;
   return widget;
 }
 
 void uiWidgetUpdate(UIWidget* widget, HeroInput* input)
 {
+  if(widget->visible == false)
+  {
+    return;
+  }
   uiButtonUpdate(widget->buttons, widget->buttonNumber, input);
 }
 
 void uiWidgetDraw(UIWidget* widget, HeroSpriteBatch* spriteBatch)
 {
-  uiButtonDraw(spriteBatch, widget->buttons, widget->buttonNumber);
+  if(widget->visible == false)
+  {
+    return;
+  }
   uiImageDraw(widget->images, widget->imageNumber, spriteBatch);
   uiLabelDraw(widget->labels, widget->labelNumber, spriteBatch);
+  uiButtonDraw(spriteBatch, widget->buttons, widget->buttonNumber);
 }
 
 void uiWidgetDestroy(UIWidget* widget)

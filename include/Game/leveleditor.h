@@ -27,7 +27,7 @@ typedef struct
 
   char** infoText;
   UIWidget* toolWidget;
-  UIWidget* mainWidget;
+  UIWidget* saveWidget;
   
   char title[64];
   bool changed;
@@ -35,6 +35,7 @@ typedef struct
   char* currentPath;
   HeroInt4 emptyBrickRect;
 
+  bool playing;
   GamePlay* play;
 } GameLevelEditor;
 
