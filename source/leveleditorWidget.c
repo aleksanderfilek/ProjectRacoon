@@ -2,6 +2,8 @@
 
 #include<stdlib.h>
 #include<stdbool.h>
+#include<string.h>
+#include<stdio.h>
 
 extern HeroCore* core;
 
@@ -228,11 +230,6 @@ static void openBtnClick(void* arg)
     return;
   }
 
-  if(levelEditor->changed == true)
-  {
-    printf("[Level editor] All changes lost\n");
-  }
-
   char const * lFilterPatterns[1] = { "*.he" };
   char* filePath = heroFileDialogOpen("Select file", "", 1, lFilterPatterns, NULL, 0);
   if(filePath == NULL)
@@ -319,19 +316,26 @@ static void updateTitle(GameLevelEditor* levelEditor)
 {
   char* pch = (char*)malloc(strlen(levelEditor->currentPath) * sizeof(char));
   strcat(pch, levelEditor->currentPath);
+
+  #ifdef _WIN32
+  pch = strtok (pch,"\\");
+  #else
   pch = strtok (pch,"/");
+  #endif
+
   char* name = NULL;
   while (pch != NULL)
   {
-    if(pch != NULL)
-    {
-      name = pch;
-    }
-    pch = strtok (NULL, "/");
+    name = pch;
+    #ifdef _WIN32
+    pch = strtok (NULL,"\\");
+    #else
+    pch = strtok (pch,"/");
+    #endif
   }
 
   name = strtok (name, ".");
-
+  memset(levelEditor->title, 0, sizeof(levelEditor->title));
   sprintf(levelEditor->title, "%s %s  ", "ProjectRacoon - LevelEditor", name);
   heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
 

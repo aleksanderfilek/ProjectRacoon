@@ -8,7 +8,6 @@ void gameClose(void**);
 int main(int argc, char *argv[])
 {
   core = heroCoreInit();
-
   {
     void* window = heroWindowInit("ProjectRacoon", 1280, 720, 0);
     heroWindowSetEvent((HeroWindow*)window, HERO_WINDOW_CLOSE, gameClose);

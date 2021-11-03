@@ -3,6 +3,9 @@
     "initializer_list": "c",
     "type_traits": "c",
     "stdlib.h": "c",
-    "play.h": "c"
+    "play.h": "c",
+    "xstring": "cpp",
+    "xutility": "c",
+    "spritesheet.h": "c"
   }
 }
