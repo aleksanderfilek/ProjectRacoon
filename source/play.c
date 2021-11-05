@@ -27,6 +27,7 @@ void* gamePlayInit()
   play->ball = ballCreate();
 
   play->started = false;
+  play->paused = false;
 
   memset(play->bricks, 1, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
 
@@ -65,6 +66,13 @@ void gamePlayDestroy(void* ptr)
 
 static void update(GamePlay* play, double deltaTime)
 {
+  if(heroInputKeyDown(play->input, HERO_KEYCODE_A))
+  {
+    play->paused = !play->paused;
+  }
+
+  if(play->paused) return;
+
   if(heroInputKeyDown(play->input, HERO_KEYCODE_ESCAPE))
   {
     printf("[Play] Game resterted\n");
@@ -90,6 +98,8 @@ static void update(GamePlay* play, double deltaTime)
     GameState* state = heroCoreModuleGet(core, "state");
     gameStateChange(state, GAMESTATE_PLAY);
   }
+
+  racketBallBounce(play->racket, play->ball);
 }
 
 static void draw(GamePlay* play)

@@ -8,6 +8,12 @@ SOURCES = source/*.c
 OBJECTS = *.o
 BUILDDIR = lib/windows
 TARGET = main
+VERSION ?= debug
+VERSIONFLAGS ?= -g -D DEBUG
+
+ifeq ($(VERSION), release)
+	VERSIONFLAGS = -O3
+endif
 
 ifeq ($(OS),windows)
 	RM = del /F /Q
@@ -32,34 +38,34 @@ build: clear pack compile link clean
 
 pack:
 ifeq ($(OS),windows)
-	$(MKDIR) build\debug\$(OS)\assets
-	$(COPY) assets build\debug\$(OS)\assets
-	$(COPY) $(LIBDIR) build\debug\windows
+	$(MKDIR) build\$(VERSION)\$(OS)\assets
+	$(COPY) assets build\$(VERSION)\$(OS)\assets
+	$(COPY) $(LIBDIR) build\$(VERSION)\windows
 else
-	$(MKDIR) build/debug/$(OS)/assets
-	$(COPY) assets build/debug/$(OS)/assets
-	$(COPY) $(LIBDIR)/linux build/debug
+	$(MKDIR) build/$(VERSION)/$(OS)/assets
+	$(COPY) assets build/$(VERSION)/$(OS)/assets
+	$(COPY) $(LIBDIR)/linux build/$(VERSION)
 endif
 
 compile:
 ifeq ($(OS),windows)
-	$(CC) -g -D DEBUG -c -I$(INCDIR) -L$(LIBDIR) $(SOURCES) $(LIBS)
+	$(CC) $(VERSIONFLAGS) -c -I$(INCDIR) -L$(LIBDIR) $(SOURCES) $(LIBS)
 else
-	$(CC) -g -D DEBUG -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
+	$(CC) $(VERSIONFLAGS) -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
 endif
 
 link:
 ifeq ($(OS),windows)
-	$(CC) -g -D DEBUG -I$(INCDIR) -L$(LIBDIR) -o build/debug/windows/$(TARGET) $(OBJECTS)  $(LIBS)
+	$(CC) $(VERSIONFLAGS) -I$(INCDIR) -L$(LIBDIR) -o build/$(VERSION)/windows/$(TARGET) $(OBJECTS)  $(LIBS)
 else
-	$(CC) -g -D DEBUG -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/debug/linux/$(TARGET) $(OBJECTS)  $(LIBS)
+	$(CC) $(VERSIONFLAGS) -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/$(VERSION)/linux/$(TARGET) $(OBJECTS)  $(LIBS)
 endif
 
 clear:
 ifeq ($(OS),windows)
-	$(IFEXIST) build\debug\$(OS) $(RMDIR) build\debug\$(OS)
+	$(IFEXIST) build\$(VERSION)\$(OS) $(RMDIR) build\$(VERSION)\$(OS)
 else
-	$(RMDIR) build/debug/$(OS)
+	$(RMDIR) build/$(VERSION)/$(OS)
 endif
 
 clean:

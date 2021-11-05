@@ -9,9 +9,12 @@ GameRacket* racketCreate()
   racket->spriteSheet = gameSpriteSheetLoad("assets/sprites/Racket.he");
   racket->rect = gameSpriteSheetGetRectByName(racket->spriteSheet, "racketstandard");
   racket->size = (HeroInt2){racket->rect.z - racket->rect.x , racket->rect.w - racket->rect.y};
-
   racket->position = (HeroFloat2){ 604.0f, 695.0f};
+
+  racket->collider = (BoxCollider2D){ racket->position, (HeroFloat2){racket->size.x,racket->size.y} };
+
   racket->speedModifier = 1.0f;
+  racket->ballInRange = false;
 
   return racket;
 }
@@ -46,6 +49,7 @@ void racketUpdate(GameRacket* racket, double deltaTime, HeroInput* input)
     racket->position.x = 1265 - racket->size.x;
   }
 
+  racket->collider.position = racket->position;
 }
 
 void racketDraw(GameRacket* racket, HeroSpriteBatch* spriteBatch)
@@ -64,5 +68,17 @@ void racketPositioning(GameRacket* racket, GameBall* ball)
 
 void racketBallBounce(GameRacket* racket, GameBall* ball)
 {
-  //sprawdzic czy pilka jest w granicy paletki
+  Collision collision = detectBoxCircleCollision(&racket->collider, &ball->collider);
+  if(collision.collided == true)
+  {
+    float centerRacket = racket->position.x + racket->size.x / 2.0f;
+    float distance = (ball->position.x + ball->collider.radius) - centerRacket;
+    float percentage = distance / (racket->size.x / 2.0f);
+
+    float strength = 2.0f;
+    HeroFloat2 oldVelocity = ball->velocity;
+    ball->velocity.x = 100.0f * percentage * strength;
+    ball->velocity.y = -ball->velocity.y;
+    ball->velocity = heroMathMultiplyF2(heroMathNormalizeF2(ball->velocity), heroMathLengthF2(oldVelocity));
+  }
 }

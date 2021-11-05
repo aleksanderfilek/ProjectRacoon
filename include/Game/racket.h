@@ -5,6 +5,7 @@
 
 #include"Game/spritesheet.h"
 #include"Game/ball.h"
+#include"Game/physics.h"
 
 #define RACKET_SPEED 300
 
@@ -13,9 +14,11 @@ typedef struct
   GameSpriteSheet* spriteSheet;
   HeroInt4 rect;
   HeroInt2 size;
-
   HeroFloat2 position;
+  BoxCollider2D collider;
+
   float speedModifier;
+  bool ballInRange;
 }GameRacket;
 
 GameRacket* racketCreate();

@@ -4,6 +4,7 @@
 #include"Hero/Hero.h"
 
 #include"Game/spritesheet.h"
+#include"Game/physics.h"
 
 #define BALL_SPEED 200
 
@@ -13,8 +14,10 @@ typedef struct
   GameSpriteSheetIndex currentSpriteIndex;
   HeroInt2 size;
   HeroInt4 rect;
-
   HeroFloat2 position;
+
+  CircleCollider2D collider;
+
   HeroFloat2 direction;
   HeroFloat2 velocity;
   float speedModifier;

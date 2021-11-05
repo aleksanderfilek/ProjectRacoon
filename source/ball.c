@@ -14,7 +14,9 @@ GameBall* ballCreate()
   ball->rect = gameSpriteSheetGetRect(ball->spriteSheet, ball->currentSpriteIndex);
   ball->size = (HeroInt2){ball->rect.z - ball->rect.x , ball->rect.w - ball->rect.y};
 
-  ball->direction = (HeroFloat2){1.0f, -1.0f};
+  ball->collider = (CircleCollider2D){heroFloat2zero, ball->size.x / 2.0f};
+
+  ball->velocity = (HeroFloat2){000.0f, -350.0f};
   ball->speedModifier = 1.0f;
 
   return ball;
@@ -29,13 +31,13 @@ void ballDestroy(GameBall* ball)
 
 bool ballUpdate(GameBall* ball, double deltaTime)
 {
-  float speed = BALL_SPEED * ball->speedModifier * deltaTime;
-  ball->velocity = heroMathMultiplyF2(ball->direction, speed);
+  float speed = ball->speedModifier * deltaTime;
 
-  ball->position = heroMathAddF2(ball->position, ball->velocity);
+  ball->position = heroMathAddF2(ball->position,heroMathMultiplyF2(ball->velocity, speed));
+
+  ball->collider.position = ball->position;
 
   bounceWall(ball);
-
 }
 
 void ballDraw(GameBall* ball, HeroSpriteBatch* spriteBatch)
@@ -47,45 +49,29 @@ void ballDraw(GameBall* ball, HeroSpriteBatch* spriteBatch)
   heroSpriteBatchDrawTextureEx(spriteBatch, ball->spriteSheet->texture,
     position, size, rect, 0.0f, (HeroColor){0xFF,0xFF,0xFF,0xFF});
 }
-#include<stdio.h>
+
 static bool bounceWall(GameBall* ball)
 {
   if(ball->position.x < 15.0f)
   {
-    float penetration = (ball->position.x - 15.0f) / fabs(ball->velocity.x);
-    HeroFloat2 penetrationVector = heroMathMultiplyF2(ball->velocity, penetration);
-    ball->position = heroMathAddF2(ball->position, penetrationVector);
-
-    ball->direction.x *= -1.0f;
-    penetrationVector.y *= -1.0f;
-    ball->position = heroMathAddF2(ball->position, penetrationVector);
+    ball->velocity.x = -ball->velocity.x;
+    ball->position.x = 15.0f;
   } 
   else if(ball->position.x + ball->size.x > 1265.0f)
   {
-    float penetration = (1265.0f - ball->position.x + ball->size.x) / ball->velocity.x;
-    HeroFloat2 penetrationVector = heroMathMultiplyF2(ball->velocity, penetration);
-    ball->position = heroMathAddF2(ball->position, penetrationVector);
-
-    ball->direction.x *= -1.0f;
-    penetrationVector.y *= -1.0f;
-    ball->position = heroMathAddF2(ball->position, penetrationVector);
+    ball->velocity.x = -ball->velocity.x;
+    ball->position.x = 1265.0f - ball->size.x;
   }
 
   if(ball->position.y < 15.0f)
   {
-    float penetration = (ball->position.y - 15.0f) / ball->velocity.y;
-    HeroFloat2 penetrationVector = heroMathMultiplyF2(ball->velocity, penetration);
-    ball->position = heroMathAddF2(ball->position, penetrationVector);
-
-    ball->direction.y *= -1.0f;
-    penetrationVector.y *= -1.0f;
-    ball->position = heroMathAddF2(ball->position, penetrationVector);
+    ball->velocity.y = -ball->velocity.y;
+    ball->position.y = 15.0f;
   }
   else if(ball->position.y > 695.0f)
   {
     return false;
   }
-
 
   return true;
 }
