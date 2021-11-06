@@ -29,6 +29,8 @@ typedef struct
 void* gamePlayInit();
 void gamePlayUpdate(void* ptr);
 void gamePlayDestroy(void* ptr);
+void gamePlayRestart(GamePlay* play);
+
 DEBUG_CODE( 
 void* gameDebugPlayInit(HeroWindow* window, HeroInput* input, 
   HeroShader* shader, GameBricks* bricks); 

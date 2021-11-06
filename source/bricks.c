@@ -35,13 +35,13 @@ void gameBricksDraw(const GameBricks* bricks, HeroSpriteBatch* spriteBatch)
     for(int x = 0; x < BRICKS_COLUMNS; x++)
     {
       int index = BRICKS_COLUMNS*y + x;
-      if(bricks->ids[index] == 0)
+      if(bricks->currentIds[index] == 0)
       {
         continue;
       }
 
       HeroInt2 position = { 15 + 50*x, 15 + 24*y };
-      HeroInt4 rect = gameSpriteSheetGetRect(bricks->spriteSheet, bricks->ids[index]-1);
+      HeroInt4 rect = gameSpriteSheetGetRect(bricks->spriteSheet, bricks->currentIds[index]-1);
       heroSpriteBatchDrawTextureEx(spriteBatch, bricks->spriteSheet->texture,
         position, (HeroInt2){50, 24}, rect, 0.0f, (HeroColor){0xFF,0xFF,0xFF,0xFF});
     }
@@ -63,7 +63,7 @@ void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
     for(int x = 0; x < BRICKS_COLUMNS; x++)
     {
       int index = BRICKS_COLUMNS*y + x;
-      if(bricks->ids[index] == 0)
+      if(bricks->currentIds[index] == 0)
       {
         continue;
       }
@@ -71,7 +71,7 @@ void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
       Collision collision = detectBoxCircleCollision(&bricks->colliders[index], &ball->collider);
       if(collision.collided == true)
       {
-        bricks->ids[index] = 0;
+        bricks->currentIds[index] = 0;
         int edge = collisionEdgeVariant(collision.direction);
         if(edge == 1 || edge == 3)
         {
@@ -79,11 +79,11 @@ void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
           float penetration = ball->collider.radius * fabs(collision.direction.x);
           if(edge == 1)
           {
-            ball->position.x -= penetration;
+            ball->position.x += penetration;
           }
           else
           {
-            ball->position.x += penetration;
+            ball->position.x -= penetration;
           }
         }
         else

@@ -26,8 +26,7 @@ void* gamePlayInit()
   play->ball = ballCreate();
   play->bricks = gameBricksCreate();
 
-  play->started = false;
-  play->paused = false;
+  gamePlayRestart(play);
 
   glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
@@ -73,9 +72,7 @@ static void update(GamePlay* play, double deltaTime)
 
   if(heroInputKeyDown(play->input, HERO_KEYCODE_R))
   {
-    printf("[Play] Game resterted\n");
-    GameState* state = heroCoreModuleGet(core, "state");
-    gameStateChange(state, GAMESTATE_PLAY);
+    gamePlayRestart(play);
   }
 
   racketUpdate(play->racket, deltaTime, play->input);
@@ -92,9 +89,7 @@ static void update(GamePlay* play, double deltaTime)
   
   if(!ballUpdate(play->ball, deltaTime))
   {
-    printf("[Play] Ball under racket\n");
-    GameState* state = heroCoreModuleGet(core, "state");
-    gameStateChange(state, GAMESTATE_PLAY);
+    gamePlayRestart(play);
   }
 
   racketBallBounce(play->racket, play->ball);
@@ -113,6 +108,15 @@ static void draw(GamePlay* play)
 
   heroSpriteBatchEnd(play->spriteBatch);
   SDL_GL_SwapWindow(play->sdlWindow);
+}
+
+void gamePlayRestart(GamePlay* play)
+{
+  printf("[Play] Game resterted\n");
+  memcpy(play->bricks->currentIds, play->bricks->ids, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
+  play->started = false;
+  play->paused = false;
+  play->racket->position = (HeroFloat2){ 604.0f, 695.0f};
 }
 
 DEBUG_CODE( 
@@ -135,9 +139,7 @@ void* gameDebugPlayInit(HeroWindow* window, HeroInput* input,
     play->ball->position = heroMathAddF2(play->ball->position, (HeroFloat2){32, -8});
     play->bricks = gameBricksCreate();
     memcpy(play->bricks->ids, bricks->ids, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
-
-    play->started = false;
-    play->paused = false;
+    gamePlayRestart(play);
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
