@@ -35,6 +35,7 @@ else
 endif
 
 build: clear pack compile link clean
+rebuild: compile link clean
 
 pack:
 ifeq ($(OS),windows)
