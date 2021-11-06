@@ -8,7 +8,7 @@
 #include"Game/state.h"
 #include"Game/spritesheet.h"
 #include"Game/ui.h"
-#include"Game/bricks.h"
+#include"Game/play.h"
 
 typedef struct
 {
@@ -34,9 +34,10 @@ typedef struct
   uint32_t currentBrick;
   char* currentPath;
   HeroInt4 emptyBrickRect;
+  GameBricks* bricks;
 
   bool playing;
-  GameBricks* bricks;
+  GamePlay* play;
 } GameLevelEditor;
 
 void* gameLevelEditorInit();
@@ -44,7 +45,7 @@ void gameLevelEditorUpdate(void* ptr);
 void gameLevelEditorDestroy(void* ptr);
 
 void gameDrawMain(GameLevelEditor* levelEditor);
-
+void gameDrawTool(GameLevelEditor* levelEditor);
 void gameSave(GameLevelEditor* levelEditor);
 
 #endif

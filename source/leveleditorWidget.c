@@ -7,15 +7,7 @@
 
 extern HeroCore* core;
 
-static void newBtnClick(void* arg);
-static void saveBtnClick(void* arg);
-static void openBtnClick(void* arg);
-static void exitBtnClick(void* arg);
-static void gameBtnClick(void* arg);
-static void saveYesBtnClick(void* arg);
-static void saveNoBtnClick(void* arg);
-
-static void updateTitle(GameLevelEditor* levelEditor);
+void updateTitle(GameLevelEditor* levelEditor);
 
 void constructToolWidget(GameLevelEditor* levelEditor)
 {
@@ -164,7 +156,7 @@ void constructSaveWidget(GameLevelEditor* levelEditor)
   heroFontUnload(font);
 }
 
-static void newBtnClick(void* arg)
+void newBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
 
@@ -196,9 +188,15 @@ static void newBtnClick(void* arg)
   memset(levelEditor->bricks->ids, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
 }
 
-static void saveBtnClick(void* arg)
+void saveBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
+
+  if(levelEditor->currentPath == NULL)
+  {
+    printf("[Level editor] Nothing to save!\n");
+    return;
+  }
 
   char const * lFilterPatterns[1] = { "*.he" };
   char* filePath = heroFileSaveDialogOpen("Save file", "levelname.he", 1, lFilterPatterns, NULL);
@@ -215,7 +213,7 @@ static void saveBtnClick(void* arg)
   updateTitle(levelEditor);
 }
 
-static void openBtnClick(void* arg)
+void openBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
 
@@ -254,7 +252,7 @@ static void openBtnClick(void* arg)
   gameDrawMain(levelEditor);
 }
 
-static void exitBtnClick(void* arg)
+void exitBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
 
@@ -274,7 +272,7 @@ static void exitBtnClick(void* arg)
   gameStateChange(state, GAMESTATE_MENU);
 }
 
-static void gameBtnClick(void* arg)
+void gameBtnClick(void* arg)
 {
   GameLevelEditor* levelEditor = (GameLevelEditor*)arg;
 
@@ -296,6 +294,10 @@ static void gameBtnClick(void* arg)
     uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_NORMAL,normal);
     uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_HOVER,highlight);
     uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_CLICK,highlight);
+
+    levelEditor->play = gameDebugPlayInit(levelEditor->mainWindow, levelEditor->input,
+      levelEditor->shader, levelEditor->bricks);
+    gameDebugPlayDraw(levelEditor->play);
   }
   else
   {
@@ -307,12 +309,16 @@ static void gameBtnClick(void* arg)
     uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_NORMAL,normal);
     uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_HOVER,highlight);
     uiButtonSetStateRect(levelEditor->toolWidget->buttons[4],UIBUTTONSTATE_CLICK,highlight);
+
+    gameDebugPlayDestroy(levelEditor->play);
+    levelEditor->play = NULL;
+    gameDrawTool(levelEditor);
   }
 
   gameDrawMain(levelEditor);
 }
 
-static void updateTitle(GameLevelEditor* levelEditor)
+void updateTitle(GameLevelEditor* levelEditor)
 {
   char* pch = (char*)malloc(strlen(levelEditor->currentPath) * sizeof(char));
   strcat(pch, levelEditor->currentPath);
@@ -342,7 +348,7 @@ static void updateTitle(GameLevelEditor* levelEditor)
   free(pch);
 }
 
-static void saveYesBtnClick(void* arg)
+void saveYesBtnClick(void* arg)
 {
   void** args = (void**)arg;
   GameLevelEditor* levelEditor = (GameLevelEditor*)args[0];
@@ -363,7 +369,7 @@ static void saveYesBtnClick(void* arg)
   free(args);
 }
 
-static void saveNoBtnClick(void* arg)
+void saveNoBtnClick(void* arg)
 {
   void** args = (void**)arg;
   GameLevelEditor* levelEditor = (GameLevelEditor*)args[0];

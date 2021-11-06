@@ -7,6 +7,7 @@
     "xstring": "cpp",
     "xutility": "c",
     "spritesheet.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "leveleditorwidget.h": "c"
   }
 }
