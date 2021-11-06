@@ -8,11 +8,13 @@ SOURCES = source/*.c
 OBJECTS = *.o
 BUILDDIR = lib/windows
 TARGET = main
-VERSION ?= debug
-VERSIONFLAGS ?= -g -D DEBUG
+VER ?= debug
+VERFLAGS ?= -g -D DEBUG
+VEREXT ?= d
 
-ifeq ($(VERSION), release)
-	VERSIONFLAGS = -O3
+ifeq ($(VER), release)
+	VERFLAGS = -O3
+	VEREXT = 
 endif
 
 ifeq ($(OS),windows)
@@ -22,7 +24,7 @@ ifeq ($(OS),windows)
 	COPY = xcopy /s /e
 	IFEXIST = if exist
 	LIBDIR = lib\windows
-	LIBS = -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
+	LIBS = -lhero$(VEREXT) -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
 	EXTENSION = .exe
 else
 	OS = linux
@@ -31,7 +33,7 @@ else
 	MKDIR = mkdir -p
 	COPY = cp -R
 	LIBDIR = lib
-	LIBS = -lhero -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
+	LIBS = -lhero$(VEREXT) -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
 endif
 
 build: clear pack compile link clean
@@ -39,34 +41,34 @@ rebuild: compile link clean
 
 pack:
 ifeq ($(OS),windows)
-	$(MKDIR) build\$(VERSION)\$(OS)\assets
-	$(COPY) assets build\$(VERSION)\$(OS)\assets
-	$(COPY) $(LIBDIR) build\$(VERSION)\windows
+	$(MKDIR) build\$(VER)\$(OS)\assets
+	$(COPY) assets build\$(VER)\$(OS)\assets
+	$(COPY) $(LIBDIR) build\$(VER)\windows
 else
-	$(MKDIR) build/$(VERSION)/$(OS)/assets
-	$(COPY) assets build/$(VERSION)/$(OS)/assets
-	$(COPY) $(LIBDIR)/linux build/$(VERSION)
+	$(MKDIR) build/$(VER)/$(OS)/assets
+	$(COPY) assets build/$(VER)/$(OS)/assets
+	$(COPY) $(LIBDIR)/linux build/$(VER)
 endif
 
 compile:
 ifeq ($(OS),windows)
-	$(CC) $(VERSIONFLAGS) -c -I$(INCDIR) -L$(LIBDIR) $(SOURCES) $(LIBS)
+	$(CC) $(VERFLAGS) -c -I$(INCDIR) -L$(LIBDIR) $(SOURCES) $(LIBS)
 else
-	$(CC) $(VERSIONFLAGS) -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
+	$(CC) $(VERFLAGS) -c -I$(INCDIR) -L$(LIBDIR)/$(OS) $(SOURCES) $(LIBS)
 endif
 
 link:
 ifeq ($(OS),windows)
-	$(CC) $(VERSIONFLAGS) -I$(INCDIR) -L$(LIBDIR) -o build/$(VERSION)/windows/$(TARGET) $(OBJECTS)  $(LIBS)
+	$(CC) $(VERFLAGS) -I$(INCDIR) -L$(LIBDIR) -o build/$(VER)/windows/$(TARGET) $(OBJECTS)  $(LIBS)
 else
-	$(CC) $(VERSIONFLAGS) -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/$(VERSION)/linux/$(TARGET) $(OBJECTS)  $(LIBS)
+	$(CC) $(VERFLAGS) -I$(INCDIR) -L$(LIBDIR)/$(OS) -Wl,-rpath,. -o build/$(VER)/linux/$(TARGET) $(OBJECTS)  $(LIBS)
 endif
 
 clear:
 ifeq ($(OS),windows)
-	$(IFEXIST) build\$(VERSION)\$(OS) $(RMDIR) build\$(VERSION)\$(OS)
+	$(IFEXIST) build\$(VER)\$(OS) $(RMDIR) build\$(VER)\$(OS)
 else
-	$(RMDIR) build/$(VERSION)/$(OS)
+	$(RMDIR) build/$(VER)/$(OS)
 endif
 
 clean:

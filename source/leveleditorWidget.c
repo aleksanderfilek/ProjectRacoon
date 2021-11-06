@@ -4,7 +4,7 @@
 #include<stdbool.h>
 #include<string.h>
 #include<stdio.h>
-
+#ifdef DEBUG
 extern HeroCore* core;
 
 void updateTitle(GameLevelEditor* levelEditor);
@@ -387,3 +387,4 @@ void saveNoBtnClick(void* arg)
 
   free(args);
 }
+#endif

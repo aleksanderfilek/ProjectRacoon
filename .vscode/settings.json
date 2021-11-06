@@ -8,6 +8,7 @@
     "xutility": "c",
     "spritesheet.h": "c",
     "stdio.h": "c",
-    "leveleditorwidget.h": "c"
+    "leveleditorwidget.h": "c",
+    "h_files.h": "c"
   }
 }

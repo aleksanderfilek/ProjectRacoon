@@ -145,7 +145,7 @@ void* gameDebugPlayInit(HeroWindow* window, HeroInput* input,
     heroWindowSetBackgroundColor(play->window, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
   return play;
-  } 
+} 
 
 void gameDebugPlayDestroy(void* ptr)
 {

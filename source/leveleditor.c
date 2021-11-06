@@ -6,7 +6,7 @@
 #include<string.h>
 
 #include"Hero/H_files.h"
-
+#ifdef DEBUG
 extern HeroCore* core;
 
 static void levelEditorclose(void**ptr);
@@ -224,7 +224,7 @@ void gameDrawMain(GameLevelEditor* levelEditor)
   heroSpriteBatchEnd(levelEditor->mainSpriteBatch);
 
   SDL_GL_SwapWindow(levelEditor->mainSdlWindow);
-}
+}  
 
 static void levelEditorclose(void** ptr)
 {
@@ -300,3 +300,4 @@ void gameSave(GameLevelEditor* levelEditor)
   levelEditor->title[strlen(levelEditor->title) - 1] = ' ';
   heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
 }
+#endif
