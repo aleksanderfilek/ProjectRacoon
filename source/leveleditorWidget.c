@@ -98,7 +98,7 @@ void constructToolWidget(GameLevelEditor* levelEditor)
     (HeroInt2){panelPosx+30,0}, (HeroInt2){580-panelPosx,30});
   uiImageSetRect(levelEditor->toolWidget->images[3], gameSpriteSheetGetRect(levelEditor->levelEditorSpriteSheet, 
     gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "panel")));
-  levelEditor->toolWidget->images[4] = uiImageCreate(levelEditor->play->brickSpriteSheet->texture,
+  levelEditor->toolWidget->images[4] = uiImageCreate(levelEditor->bricks->spriteSheet->texture,
     (HeroInt2){70,100}, (HeroInt2){500,240});
   levelEditor->toolWidget->images[5] = uiImageCreate(levelEditor->levelEditorSpriteSheet->texture,
     (HeroInt2){70,100}, (HeroInt2){50,24});
@@ -106,10 +106,10 @@ void constructToolWidget(GameLevelEditor* levelEditor)
     gameSpriteSheetGet(levelEditor->levelEditorSpriteSheet, "highlight")));
   levelEditor->toolWidget->images[5]->visible = false;
 
-  levelEditor->toolWidget->labelNumber = levelEditor->play->brickSpriteSheet->length + 1;
+  levelEditor->toolWidget->labelNumber = levelEditor->bricks->spriteSheet->length + 1;
   levelEditor->toolWidget->labels = (UILabel**)malloc(levelEditor->toolWidget->labelNumber * sizeof(UILabel*));
   HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 18);
-  for(int i = 0; i <= levelEditor->play->brickSpriteSheet->length; i++)
+  for(int i = 0; i <= levelEditor->bricks->spriteSheet->length; i++)
   {
     levelEditor->toolWidget->labels[i] = uiLabelCreate(levelEditor->infoText[i], font, (HeroColor){255,255,255,255},
      UIALLIGMENT_TOPLEFT, (HeroInt2){5,425}, (HeroInt2){630,50});
@@ -193,7 +193,7 @@ static void newBtnClick(void* arg)
   updateTitle(levelEditor);
   levelEditor->title[strlen(levelEditor->title) - 1] = ' ';
   heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
-  memset(levelEditor->play->bricks, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
+  memset(levelEditor->bricks->ids, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
 }
 
 static void saveBtnClick(void* arg)
@@ -240,7 +240,7 @@ static void openBtnClick(void* arg)
   
   FILE* file = fopen(filePath, "rb");
   
-  fread(levelEditor->play->bricks, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
+  fread(levelEditor->bricks->ids, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
 
   fclose(file);
 

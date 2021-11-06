@@ -9,6 +9,11 @@ GameSpriteSheet* gameSpriteSheetLoad(const char* path)
   GameSpriteSheet* spriteSheet = (GameSpriteSheet*)malloc(sizeof(GameSpriteSheet));
 
   FILE* srcFile = fopen(path, "rb");
+  if(srcFile == NULL)
+  {
+    printf("[Sprite sheet] Could not load file, path %s\n", path);
+    return NULL;
+  }
 
   uint32_t size;
   fread(&size, sizeof(uint32_t), 1, srcFile); // get name length

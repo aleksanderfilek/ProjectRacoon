@@ -4,15 +4,7 @@
 #include<math.h>
 #include<stdlib.h>
 
-#define max(a, b) (a > b)? a : b
-#define min(a, b) (a < b)? a : b
-
-float clamp(float value, float a, float b)
-{
-  return max(a, min(b, value));
-}
-
-Collision intersectionBoxBox(const BoxCollider2D* boxA, const BoxCollider2D* boxB)
+Collision detectBoxCollision(const BoxCollider2D* boxA, const BoxCollider2D* boxB)
 {
   bool collisionX = boxA->position.x + boxA->size.x >= boxB->position.x &&
     boxB->position.x + boxB->size.x >= boxA->position.x;

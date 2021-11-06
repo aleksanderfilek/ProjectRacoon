@@ -6,6 +6,7 @@
     "play.h": "c",
     "xstring": "cpp",
     "xutility": "c",
-    "spritesheet.h": "c"
+    "spritesheet.h": "c",
+    "stdio.h": "c"
   }
 }

@@ -26,8 +26,8 @@ void* gameLevelEditorInit()
   strcat(levelEditor->title, "ProjectRacoon - LevelEditor");
   levelEditor->playing = false;
 
-  levelEditor->play = (GamePlay*)malloc(sizeof(GamePlay));
-  memset(levelEditor->play->bricks, 0, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
+  levelEditor->bricks = gameBricksCreate();
+  memset(levelEditor->bricks->ids, 0, sizeof(levelEditor->bricks->ids));
 
 
   levelEditor->input = heroCoreModuleGet(core, "input");
@@ -35,7 +35,6 @@ void* gameLevelEditorInit()
   levelEditor->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
   levelEditor->levelEditorSpriteSheet = gameSpriteSheetLoad("assets/debug/LevelEditor.he");
   levelEditor->emptyBrickRect = gameSpriteSheetGetRectByName(levelEditor->levelEditorSpriteSheet, "emptyBrick");
-  levelEditor->play->brickSpriteSheet = gameSpriteSheetLoad("assets/sprites/Bricks.he");
   loadBricksInfo(levelEditor);
 
   levelEditor->mainWindow = heroCoreModuleGet(core, "window");
@@ -46,7 +45,6 @@ void* gameLevelEditorInit()
   heroWindowSetBackgroundColor(levelEditor->mainWindow, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
   levelEditor->mainSpriteBatch = heroSpriteBatchInit(levelEditor->mainWindow, 100, 32, levelEditor->shader);
-  levelEditor->play->spriteBatch = levelEditor->mainSpriteBatch;
 
   levelEditor->toolWindow = heroWindowInit(levelEditor->title, 640, 480, 0);
   glEnable( GL_BLEND );
@@ -80,13 +78,13 @@ void gameLevelEditorDestroy(void* ptr)
 
   uiWidgetDestroy(levelEditor->toolWidget);
 
-  for(int i = 1; i <= levelEditor->play->brickSpriteSheet->length; i++)
+  for(int i = 1; i <= levelEditor->bricks->spriteSheet->length; i++)
   {
     free(levelEditor->infoText[i]);
   }
+  gameBricksDestory(levelEditor->bricks);
 
   gameSpriteSheetUnload(levelEditor->levelEditorSpriteSheet);
-  gameSpriteSheetUnload(levelEditor->play->brickSpriteSheet);
 
   heroShaderUnload(levelEditor->shader);
   heroSpriteBatchDestroy(levelEditor->toolSpriteBatch);
@@ -116,7 +114,7 @@ static void update(GameLevelEditor* levelEditor)
       int iX = normX / 50;
       int iY = normY / 24;
       int index = 10 * iY + iX + 1;
-      if(index > levelEditor->play->brickSpriteSheet->length)
+      if(index > levelEditor->bricks->spriteSheet->length)
       {
         index = 0;
       }
@@ -138,7 +136,7 @@ static void update(GameLevelEditor* levelEditor)
       int iX = normX / 50;
       int iY = normY / 24;
       int index = 25 * iY + iX;
-      levelEditor->play->bricks[index] = (ctrlMouseClick == false)? levelEditor->currentBrick : 0;
+      levelEditor->bricks->ids[index] = (ctrlMouseClick == false)? levelEditor->currentBrick : 0;
 
       levelEditor->changed = true;
 
@@ -198,7 +196,7 @@ void gameDrawMain(GameLevelEditor* levelEditor)
       for(int x = 0; x < BRICKS_COLUMNS; x++)
       {
         int index = BRICKS_COLUMNS*y + x;
-        if(levelEditor->play->bricks[index] > 0)
+        if(levelEditor->bricks->ids[index] > 0)
         {
           continue;
         }
@@ -208,7 +206,7 @@ void gameDrawMain(GameLevelEditor* levelEditor)
           position, (HeroInt2){50, 24}, levelEditor->emptyBrickRect, 0.0f, (HeroColor){0xFF,0xFF,0xFF,0xFF});
       }
     }
-    gamePlayBricksDraw(levelEditor->play);
+    gameBricksDraw(levelEditor->bricks, levelEditor->mainSpriteBatch);
   }
   else
   {
@@ -229,8 +227,8 @@ static void levelEditorclose(void** ptr)
 static void loadBricksInfo(GameLevelEditor* levelEditor)
 {
   levelEditor->infoText = (char**)malloc(
-    (levelEditor->play->brickSpriteSheet->length + 1) * sizeof(char*));
-  memset(levelEditor->infoText, 0, (levelEditor->play->brickSpriteSheet->length + 1) * sizeof(char*));
+    (levelEditor->bricks->spriteSheet->length + 1) * sizeof(char*));
+  memset(levelEditor->infoText, 0, (levelEditor->bricks->spriteSheet->length + 1) * sizeof(char*));
   levelEditor->infoText[0] = "None";
 
   FILE* file = fopen("assets/debug/BricksInfo.txt", "r");
@@ -241,7 +239,7 @@ static void loadBricksInfo(GameLevelEditor* levelEditor)
   }
 
   size_t bufferSize;
-  for(int i = 1; i <= levelEditor->play->brickSpriteSheet->length; i++)
+  for(int i = 1; i <= levelEditor->bricks->spriteSheet->length; i++)
   {
     getline(&levelEditor->infoText[i], &bufferSize, file);
     uint32_t lastChar = strlen(levelEditor->infoText[i]) - 1;
@@ -286,7 +284,7 @@ void gameSave(GameLevelEditor* levelEditor)
 {
   FILE* file = fopen(levelEditor->currentPath, "wb");
 
-  fwrite(levelEditor->play->bricks, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
+  fwrite(levelEditor->bricks->ids, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
 
   fclose(file);
 

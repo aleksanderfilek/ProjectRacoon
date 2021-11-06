@@ -5,12 +5,9 @@
 
 #include"Hero/Hero.h"
 
-#include"Game/spritesheet.h"
+#include"Game/bricks.h"
 #include"Game/racket.h"
 #include"Game/ball.h"
-
-#define BRICKS_COLUMNS 25
-#define BRICKS_ROWS 12
 
 typedef struct
 {
@@ -21,11 +18,9 @@ typedef struct
   HeroShader* shader;
   HeroSpriteBatch* spriteBatch;
 
-  GameSpriteSheet* brickSpriteSheet;
-  uint8_t bricks[BRICKS_ROWS * BRICKS_COLUMNS];
-
   GameRacket* racket;
   GameBall* ball;
+  GameBricks* bricks;
 
   bool started;
   bool paused;
@@ -34,7 +29,5 @@ typedef struct
 void* gamePlayInit();
 void gamePlayUpdate(void* ptr);
 void gamePlayDestroy(void* ptr);
-
-void gamePlayBricksDraw(GamePlay* play);
 
 #endif
