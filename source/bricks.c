@@ -79,11 +79,11 @@ void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
           float penetration = ball->collider.radius * fabs(collision.direction.x);
           if(edge == 1)
           {
-            ball->position.x += penetration;
+            ball->position.x -= penetration;
           }
           else
           {
-            ball->position.x -= penetration;
+            ball->position.x += penetration;
           }
         }
         else
