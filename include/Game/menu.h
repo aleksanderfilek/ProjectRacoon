@@ -31,6 +31,9 @@ typedef struct
   UIWidget* currentWidget;
   UIWidget* widgets[2];
 
+  // levels
+  char** levelsPaths;
+  uint32_t levelsNumber;
 } GameMenu;
 
 void* gameMenuInit();

@@ -22,5 +22,6 @@ GameBricks* gameBricksCreate();
 void gameBricksDraw(const GameBricks* bricks, HeroSpriteBatch* spriteBatch);
 void gameBricksDestory(GameBricks* bricks);
 void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball);
+void gameBricksLoadLevel(GameBricks* bricks, const char* path);
 
 #endif

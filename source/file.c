@@ -2,25 +2,19 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+#define SLASH "/"
+
 char* gameFileGetName(const char* path)
 {
   char* pch = strdup(path);
 
-  #ifdef _WIN32
-  pch = strtok (pch,"\\");
-  #else
-  pch = strtok (pch,"/");
-  #endif
+  pch = strtok (pch, SLASH);
 
   char* name = NULL;
   while (pch != NULL)
   {
     name = pch;
-    #ifdef _WIN32
-    pch = strtok (NULL,"\\");
-    #else
-    pch = strtok (pch,"/");
-    #endif
+    pch = strtok (NULL, SLASH);
   }
 
   name = strtok (name, ".");

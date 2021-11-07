@@ -1,5 +1,6 @@
 #include"Hero/Hero.h"
 #include"Game/state.h"
+#include"Game/sharedata.h"
 
 HeroCore* core = NULL;
 
@@ -22,6 +23,10 @@ int main(int argc, char *argv[])
 
     void* state = gameStateInit();
     heroCoreModuleAdd(core, "state", state, gameStateUpdate, gameStateDestroy);
+
+    void* sharedata = gameShareDataInit(1);
+    gameSharedDataAdd(sharedata, "level", NULL, NULL);
+    heroCoreModuleAdd(core, "data", sharedata, NULL, gameShareDataDestroy);
   }
 
   heroCoreStart(core);

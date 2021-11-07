@@ -1,9 +1,11 @@
 #include"Game/leveleditorWidget.h"
+#include"Game/file.h"
 
 #include<stdlib.h>
 #include<stdbool.h>
 #include<string.h>
 #include<stdio.h>
+
 #ifdef DEBUG
 extern HeroCore* core;
 
@@ -235,12 +237,8 @@ void openBtnClick(void* arg)
     printf("[Level editor] Open file path not selected\n");
     return;
   }
-  
-  FILE* file = fopen(filePath, "rb");
-  
-  fread(levelEditor->bricks->ids, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
 
-  fclose(file);
+  gameBricksLoadLevel(levelEditor->bricks, filePath);
 
   levelEditor->currentPath = filePath;
   levelEditor->changed = false;
@@ -320,32 +318,12 @@ void gameBtnClick(void* arg)
 
 void updateTitle(GameLevelEditor* levelEditor)
 {
-  char* pch = (char*)malloc(strlen(levelEditor->currentPath) * sizeof(char));
-  strcat(pch, levelEditor->currentPath);
-
-  #ifdef _WIN32
-  pch = strtok (pch,"\\");
-  #else
-  pch = strtok (pch,"/");
-  #endif
-
-  char* name = NULL;
-  while (pch != NULL)
-  {
-    name = pch;
-    #ifdef _WIN32
-    pch = strtok (NULL,"\\");
-    #else
-    pch = strtok (pch,"/");
-    #endif
-  }
-
-  name = strtok (name, ".");
+  char* name = gameFileGetName(levelEditor->currentPath);
   memset(levelEditor->title, 0, sizeof(levelEditor->title));
   sprintf(levelEditor->title, "%s %s  ", "ProjectRacoon - LevelEditor", name);
   heroWindowSetTitle(levelEditor->toolWindow, levelEditor->title);
 
-  free(pch);
+  free(name);
 }
 
 void saveYesBtnClick(void* arg)

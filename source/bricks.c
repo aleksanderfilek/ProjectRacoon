@@ -3,11 +3,11 @@
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>
+#include<stdio.h>
 
 GameBricks* gameBricksCreate()
 {
   GameBricks* bricks = (GameBricks*)malloc(sizeof(GameBricks));
-  memset(bricks->ids, 1, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
   bricks->spriteSheet = gameSpriteSheetLoad("assets/sprites/Bricks.he");
 
   HeroFloat2 size = (HeroFloat2){
@@ -126,4 +126,17 @@ static int collisionEdgeVariant(HeroFloat2 vector)
   }
 
   return bestMatch;
+}
+
+void gameBricksLoadLevel(GameBricks* bricks, const char* path)
+{
+  FILE* file = fopen(path, "rb");
+  if(file == NULL)
+  {
+    printf("[Bricks] Could not load level, path: %s\n", path);
+  }
+
+  fread(bricks->ids, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
+
+  fclose(file);
 }

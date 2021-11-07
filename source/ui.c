@@ -231,8 +231,8 @@ void uiWidgetDraw(UIWidget* widget, HeroSpriteBatch* spriteBatch)
     return;
   }
   uiImageDraw(widget->images, widget->imageNumber, spriteBatch);
-  uiLabelDraw(widget->labels, widget->labelNumber, spriteBatch);
   uiButtonDraw(spriteBatch, widget->buttons, widget->buttonNumber);
+  uiLabelDraw(widget->labels, widget->labelNumber, spriteBatch);
 }
 
 void uiWidgetDestroy(UIWidget* widget)

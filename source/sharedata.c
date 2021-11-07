@@ -42,6 +42,7 @@ void gameSharedDataAdd(GameSharedDataSystem* system, const char* name,
       {
         data->data = variable;
         data->delteFunc = delteFunc;
+        return;
       }
     }
     else if(firstEmpty == -1)
@@ -55,6 +56,7 @@ void gameSharedDataAdd(GameSharedDataSystem* system, const char* name,
     system->datas[firstEmpty].name = strdup(name);
     system->datas[firstEmpty].data = variable;
     system->datas[firstEmpty].delteFunc = delteFunc;
+    return;
   }
 
   int index = system->capacity;
@@ -94,6 +96,11 @@ void gameSharedDataRemove(GameSharedDataSystem* system, const char* name)
 
 static void remove(GameShareData* data)
 {
+  if(data->name != NULL)
+  {
+    free(data->name);
+  }
+
   if(data->data == NULL)
   {
     return;

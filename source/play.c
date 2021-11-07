@@ -1,6 +1,6 @@
-
 #include"Game/play.h"
 #include"Game/state.h"
+#include"Game/sharedata.h"
 
 #include<stdlib.h>
 #include<stdio.h>
@@ -25,6 +25,10 @@ void* gamePlayInit()
   play->racket = racketCreate();
   play->ball = ballCreate();
   play->bricks = gameBricksCreate();
+
+  GameSharedDataSystem* sharedata = heroCoreModuleGet(core, "data");
+  const char* path = gameSharedDataGet(sharedata, "level");
+  gameBricksLoadLevel(play->bricks, path);
 
   gamePlayRestart(play);
 
