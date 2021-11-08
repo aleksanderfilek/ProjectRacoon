@@ -11,6 +11,10 @@ extern HeroCore* core;
 static void update(GamePlay* play, double deltaTime);
 static void draw(GamePlay* play);
 
+static void conctructPauseWidget(GamePlay* play);
+static void playBtnClick(void* arg);
+static void quitBtnClick(void* arg);
+
 void* gamePlayInit()
 {
   GamePlay* play = (GamePlay*)malloc(sizeof(GamePlay));
@@ -18,6 +22,9 @@ void* gamePlayInit()
   play->window = heroCoreModuleGet(core, "window");
   play->sdlWindow = heroWindowGetSdlWindow(play->window);
   play->input = heroCoreModuleGet(core, "input");
+
+  play->pauseTextures[0] = heroTextureLoad("assets/sprites/playBtn.png", 0);
+  play->pauseTextures[1] = heroTextureLoad("assets/sprites/quitBtn.png", 0);
 
   play->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
   play->spriteBatch = heroSpriteBatchInit(play->window, 128, 10, play->shader);
@@ -37,6 +44,8 @@ void* gamePlayInit()
 
   heroWindowSetBackgroundColor(play->window, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
+  conctructPauseWidget(play);
+
   return play;
 }
 
@@ -55,6 +64,10 @@ void gamePlayDestroy(void* ptr)
 {
   GamePlay* play = (GamePlay*)ptr;
 
+  uiWidgetDestroy(play->pauseWidget);
+  heroTextureUnload(play->pauseTextures[0]);
+  heroTextureUnload(play->pauseTextures[1]);
+
   heroSpriteBatchDestroy(play->spriteBatch);
   heroShaderUnload(play->shader);
 
@@ -67,9 +80,17 @@ void gamePlayDestroy(void* ptr)
 
 static void update(GamePlay* play, double deltaTime)
 {
-  if(heroInputKeyDown(play->input, HERO_KEYCODE_A))
+  
+  if(play->pauseWidget->visible == false)
   {
-    play->paused = !play->paused;
+    if(heroInputKeyDown(play->input, HERO_KEYCODE_A))
+    {
+      playBtnClick(play);
+    }
+  }
+  else
+  {
+    uiWidgetUpdate(play->pauseWidget, play->input);
   }
 
   if(play->paused) return;
@@ -109,6 +130,7 @@ static void draw(GamePlay* play)
   gameBricksDraw(play->bricks, play->spriteBatch);
   ballDraw(play->ball, play->spriteBatch);
   racketDraw(play->racket, play->spriteBatch);
+  uiWidgetDraw(play->pauseWidget, play->spriteBatch);
 
   heroSpriteBatchEnd(play->spriteBatch);
   SDL_GL_SwapWindow(play->sdlWindow);
@@ -121,6 +143,31 @@ void gamePlayRestart(GamePlay* play)
   play->started = false;
   play->paused = false;
   play->racket->position = (HeroFloat2){ 604.0f, 695.0f};
+}
+
+static void conctructPauseWidget(GamePlay* play)
+{
+  play->pauseWidget = uiWidgetCreate();
+  play->pauseWidget->visible = false;
+  play->pauseWidget->buttonNumber = 2;
+  play->pauseWidget->buttons = (UIButton**)malloc(play->pauseWidget->buttonNumber * sizeof(UIButton*));
+  play->pauseWidget->buttons[0] = uiButtonCreate(play->pauseTextures[0], (HeroInt2){420,286},(HeroInt2){386,64});
+  uiButtonSetClickFunc(play->pauseWidget->buttons[0], playBtnClick, play);
+  play->pauseWidget->buttons[1] = uiButtonCreate(play->pauseTextures[1], (HeroInt2){420,370},(HeroInt2){386,64});
+  uiButtonSetClickFunc(play->pauseWidget->buttons[1], quitBtnClick, play);
+}
+
+static void playBtnClick(void* arg)
+{
+  GamePlay* play = (GamePlay*)arg;
+  play->paused = !play->paused;
+  play->pauseWidget->visible = play->paused;
+}
+
+static void quitBtnClick(void* arg)
+{
+  GameState* state = heroCoreModuleGet(core, "state");
+  gameStateChange(state, GAMESTATE_MENU);
 }
 
 DEBUG_CODE( 

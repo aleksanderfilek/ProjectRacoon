@@ -8,6 +8,7 @@
 #include"Game/bricks.h"
 #include"Game/racket.h"
 #include"Game/ball.h"
+#include"Game/ui.h"
 
 typedef struct
 {
@@ -24,6 +25,9 @@ typedef struct
 
   bool started;
   bool paused;
+
+  UIWidget* pauseWidget;
+  HeroTexture* pauseTextures[2];
 } GamePlay;
 
 void* gamePlayInit();
