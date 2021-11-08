@@ -173,22 +173,29 @@ static UIWidget* widgetConstructPlayMenu(GameMenu* menu)
 {
   UIWidget* widget = uiWidgetCreate();
 
-  widget->buttonNumber = 2;
+  widget->buttonNumber = 5;
   widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
   widget->buttons[0] = uiButtonCreate(menu->textures[2], (HeroInt2){50,50},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[0], backToMenuClick, menu);
-  widget->buttons[1] = uiButtonCreate(menu->textures[4], (HeroInt2){50,150},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[1], gameClick, menu->levelsPaths[0]);
 
   HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 32);
 
-  widget->labelNumber = 1;
+  widget->labelNumber = 4;
   widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
 
-  char* name = gameFileGetName(menu->levelsPaths[0]);
-  widget->labels[0] = uiLabelCreate(name, font, (HeroColor){255,255,255,255},
-    UIALLIGMENT_CENTER, (HeroInt2){50,150},(HeroInt2){386,64});
-  free(name);
+  int y = 150;
+  for(int i = 0; i < 4; i++)
+  {
+    widget->buttons[i+1] = uiButtonCreate(menu->textures[4], (HeroInt2){50,y},(HeroInt2){386,64});
+    uiButtonSetClickFunc(widget->buttons[i+1], gameClick, menu->levelsPaths[i]);
+
+    char* name = gameFileGetName(menu->levelsPaths[i]);
+    widget->labels[i] = uiLabelCreate(name, font, (HeroColor){255,255,255,255},
+      UIALLIGMENT_CENTER, (HeroInt2){50,y},(HeroInt2){386,64});
+    free(name);
+    y+= 84;
+  }
+
   heroFontUnload(font);
 
   return widget;
