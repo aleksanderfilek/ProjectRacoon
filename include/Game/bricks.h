@@ -7,6 +7,8 @@
 #include"Game/physics.h"
 #include"Game/ball.h"
 
+#include<stdbool.h>
+
 #define BRICKS_COLUMNS 25
 #define BRICKS_ROWS 12
 
@@ -21,7 +23,7 @@ typedef struct
 GameBricks* gameBricksCreate();
 void gameBricksDraw(const GameBricks* bricks, HeroSpriteBatch* spriteBatch);
 void gameBricksDestory(GameBricks* bricks);
-void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball);
+bool gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball);
 void gameBricksLoadLevel(GameBricks* bricks, const char* path);
 
 #endif

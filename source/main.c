@@ -21,6 +21,10 @@ int main(int argc, char *argv[])
     heroEventAddWindow(event, (HeroWindow*)window);
     heroCoreModuleAdd(core, "event", event, heroEventUpdate, heroEventDestroy);
 
+    void* audio = heroAudioInit(HERO_AUDIO_FREQUENCY_44100, HERO_AUDIO_CHANNEL_MONO, 
+      MIX_DEFAULT_FORMAT, 2048, HERO_AUDIO_FORMAT_MP3);
+    heroCoreModuleAdd(core, "audio", audio, NULL, heroAudioDestroy);
+
     void* state = gameStateInit();
     heroCoreModuleAdd(core, "state", state, gameStateUpdate, gameStateDestroy);
 

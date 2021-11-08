@@ -66,7 +66,7 @@ void racketPositioning(GameRacket* racket, GameBall* ball)
   ball->position = heroMathAddF2(ball->position, (HeroFloat2){32, -8});
 }
 
-void racketBallBounce(GameRacket* racket, GameBall* ball)
+bool racketBallBounce(GameRacket* racket, GameBall* ball)
 {
   Collision collision = detectBoxCircleCollision(&racket->collider, &ball->collider);
   if(collision.collided == true)
@@ -80,5 +80,8 @@ void racketBallBounce(GameRacket* racket, GameBall* ball)
     ball->velocity.x = 100.0f * percentage * strength;
     ball->velocity.y = -ball->velocity.y;
     ball->velocity = heroMathMultiplyF2(heroMathNormalizeF2(ball->velocity), heroMathLengthF2(oldVelocity));
+    
+    return true;
   }
+  return false;
 }

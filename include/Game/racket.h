@@ -26,6 +26,6 @@ void racketDestroy(GameRacket* racket);
 void racketUpdate(GameRacket* racket, double deltaTime, HeroInput* input);
 void racketDraw(GameRacket* racket, HeroSpriteBatch* spriteBatch);
 void racketPositioning(GameRacket* racket, GameBall* ball);
-void racketBallBounce(GameRacket* racket, GameBall* ball);
+bool racketBallBounce(GameRacket* racket, GameBall* ball);
 
 #endif

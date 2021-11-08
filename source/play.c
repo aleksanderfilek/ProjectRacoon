@@ -26,6 +26,10 @@ void* gamePlayInit()
   play->pauseTextures[0] = heroTextureLoad("assets/sprites/playBtn.png", 0);
   play->pauseTextures[1] = heroTextureLoad("assets/sprites/quitBtn.png", 0);
 
+  play->sounds[0] = heroAudioSoundLoad("assets/sounds/beep1.mp3");
+  play->sounds[1] = heroAudioSoundLoad("assets/sounds/beep2.mp3");
+  play->currentSound = 0;
+
   play->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
   play->spriteBatch = heroSpriteBatchInit(play->window, 128, 10, play->shader);
 
@@ -64,6 +68,9 @@ void gamePlayDestroy(void* ptr)
 {
   GamePlay* play = (GamePlay*)ptr;
 
+  heroAudioSoundUnload(play->sounds[0]);
+  heroAudioSoundUnload(play->sounds[1]);
+
   uiWidgetDestroy(play->pauseWidget);
   heroTextureUnload(play->pauseTextures[0]);
   heroTextureUnload(play->pauseTextures[1]);
@@ -83,7 +90,7 @@ static void update(GamePlay* play, double deltaTime)
   
   if(play->pauseWidget->visible == false)
   {
-    if(heroInputKeyDown(play->input, HERO_KEYCODE_A))
+    if(heroInputKeyDown(play->input, HERO_KEYCODE_ESCAPE))
     {
       playBtnClick(play);
     }
@@ -117,8 +124,14 @@ static void update(GamePlay* play, double deltaTime)
     gamePlayRestart(play);
   }
 
-  racketBallBounce(play->racket, play->ball);
-  gameBricksCheckCollisions(play->bricks, play->ball);
+  bool collided = racketBallBounce(play->racket, play->ball);
+  collided |= gameBricksCheckCollisions(play->bricks, play->ball);
+  if(collided == true)
+  {
+    heroAudioSoundPlay(play->sounds[play->currentSound], false);
+    play->currentSound++;
+    play->currentSound %= 2;
+  }
 }
 
 static void draw(GamePlay* play)

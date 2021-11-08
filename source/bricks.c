@@ -56,7 +56,7 @@ void gameBricksDestory(GameBricks* bricks)
 
 static int collisionEdgeVariant(HeroFloat2 vector);
 
-void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
+bool gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
 {
   for(int y = 0; y < BRICKS_ROWS; y++)
   {
@@ -99,10 +99,12 @@ void gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
             ball->position.y += penetration;
           }
         }
-        return;
+        return true;
       }
     }
   }
+
+  return false;
 }
 
 static int collisionEdgeVariant(HeroFloat2 vector)

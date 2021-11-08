@@ -28,6 +28,9 @@ typedef struct
 
   UIWidget* pauseWidget;
   HeroTexture* pauseTextures[2];
+
+  HeroSound* sounds[2];
+  uint32_t currentSound;
 } GamePlay;
 
 void* gamePlayInit();
