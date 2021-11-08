@@ -215,6 +215,44 @@ void gameDebugPlayDestroy(void* ptr)
 
 void gameDebugPlayDraw(GamePlay* play)
 {
-  draw(play);
+  heroWindowSetCurrentContext(play->window);
+  glClear(GL_COLOR_BUFFER_BIT);
+  heroSpriteBatchBegin(play->spriteBatch);
+
+  gameBricksDraw(play->bricks, play->spriteBatch);
+  ballDraw(play->ball, play->spriteBatch);
+  racketDraw(play->racket, play->spriteBatch);
+
+  heroSpriteBatchEnd(play->spriteBatch);
+  SDL_GL_SwapWindow(play->sdlWindow);
+}
+
+void gameDebugPlayUpdate(GamePlay* play)
+{
+  double deltaTime = heroCoreGetDeltaTime(core);
+  if(heroInputKeyDown(play->input, HERO_KEYCODE_R))
+  {
+    gamePlayRestart(play);
+  }
+
+  racketUpdate(play->racket, deltaTime, play->input);
+
+  if(play->started == false)
+  {
+    racketPositioning(play->racket, play->ball);
+    if(heroInputKeyDown(play->input, HERO_KEYCODE_SPACE))
+    {
+      play->started = true;
+    }
+    return;
+  }
+  
+  if(!ballUpdate(play->ball, deltaTime))
+  {
+    gamePlayRestart(play);
+  }
+
+  racketBallBounce(play->racket, play->ball);
+  gameBricksCheckCollisions(play->bricks, play->ball);
 }
   )

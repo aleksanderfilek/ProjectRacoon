@@ -22,6 +22,7 @@ void* gameLevelEditorInit()
   levelEditor->changed = false;
   levelEditor->currentBrick = 0;
   levelEditor->currentPath = NULL;
+  memset(levelEditor->title, 0, sizeof(levelEditor->title));
   strcat(levelEditor->title, "ProjectRacoon - LevelEditor");
   levelEditor->playing = false;
 
@@ -125,7 +126,7 @@ static void update(GameLevelEditor* levelEditor)
   {
     if(levelEditor->playing == true)
     {
-      gamePlayUpdate(levelEditor->play);
+      gameDebugPlayUpdate(levelEditor->play);
     }
     else
     {
@@ -171,7 +172,14 @@ static void draw(GameLevelEditor* levelEditor)
   }
   else if(heroWindowIsFocused(levelEditor->mainWindow) == true)
   {
-    gameDrawMain(levelEditor);
+    if(levelEditor->playing == true)
+    {
+      gameDebugPlayDraw(levelEditor->play);
+    }
+    else
+    {
+      gameDrawMain(levelEditor);
+    }
   }
 }
 

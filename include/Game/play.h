@@ -40,5 +40,6 @@ void* gameDebugPlayInit(HeroWindow* window, HeroInput* input,
   HeroShader* shader, GameBricks* bricks); 
 void gameDebugPlayDestroy(void* ptr);
 void gameDebugPlayDraw(GamePlay* play);
+void gameDebugPlayUpdate(GamePlay* play);
   )
 #endif
