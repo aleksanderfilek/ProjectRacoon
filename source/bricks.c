@@ -132,6 +132,7 @@ static int collisionEdgeVariant(HeroFloat2 vector)
 
 void gameBricksLoadLevel(GameBricks* bricks, const char* path)
 {
+  printf("[Bricks] Load level, path:%s\n", path);
   FILE* file = fopen(path, "rb");
   if(file == NULL)
   {
