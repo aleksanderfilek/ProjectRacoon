@@ -1,6 +1,9 @@
+#include"Game/menu.h"
 #include"Game/state.h"
 #include"Game/file.h"
 #include"Game/sharedata.h"
+
+#include"Game/menuWidget.h"
 
 #include<stdlib.h>
 #include<stdio.h>
@@ -9,13 +12,6 @@ extern HeroCore* core;
 
 static void update(GameMenu* menu);
 static void draw(GameMenu* menu);
-static void changeState(GameMenu* menu, MenuState state);
-static void playClick();
-static void quitClick();
-static void backToMenuClick();
-static void gameClick();
-static UIWidget* widgetConstructMainMenu(GameMenu* menu);
-static UIWidget* widgetConstructPlayMenu(GameMenu* menu);
 
 void* gameMenuInit()
 {
@@ -42,10 +38,10 @@ void* gameMenuInit()
 
   menu->levelsPaths = gameFileGetInDirectory("assets/levels", &menu->levelsNumber);
 
-  menu->widgets[0] = widgetConstructMainMenu(menu);
-  menu->widgets[1] = widgetConstructPlayMenu(menu);
+  widgetConstructMainMenu(menu);
+  widgetConstructPlayMenu(menu);
 
-  changeState(menu, MENUSTATE_MAIN);
+  gameChangeState(menu, MENUSTATE_MAIN);
 
   glClearColor(1.0f,1.0f,1.0f,1.0f);
 
@@ -119,85 +115,8 @@ static void draw(GameMenu* menu)
   SDL_GL_SwapWindow(menu->sdlWindow);
 }
 
-static void changeState(GameMenu* menu, MenuState state)
+void gameChangeState(GameMenu* menu, MenuState state)
 {
   menu->uiState = state;
   menu->currentWidget =  menu->widgets[(int)state];
-}
-
-static void playClick(void* arg)
-{
-  changeState((GameMenu*)arg, MENUSTATE_LEVELS);
-}
-
-static void quitClick(void* arg)
-{
-  heroCoreClose((HeroCore*)arg);
-}
-
-static void backToMenuClick(void* arg)
-{
-  changeState((GameMenu*)arg, MENUSTATE_MAIN);
-}
-
-static void gameClick(void* arg)
-{
-  GameState* state = heroCoreModuleGet(core, "state");
-  gameStateChange(state, GAMESTATE_PLAY);
-
-  char* path = strdup((char*)arg);
-  GameSharedDataSystem* sharedata = heroCoreModuleGet(core, "data");
-  gameSharedDataAdd(sharedata, "level", path, NULL);
-}
-
-static UIWidget* widgetConstructMainMenu(GameMenu* menu)
-{
-  UIWidget* widget = uiWidgetCreate();
-
-  widget->buttonNumber = 2;
-  widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
-  widget->buttons[0] = uiButtonCreate(menu->textures[0], (HeroInt2){50,50},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
-  widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){50,150},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
-  widget->labelNumber = 1;
-  widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
-  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 16);
-  widget->labels[0] = uiLabelCreate("Created by Aleksander Filek", font, (HeroColor){0,0,0,0},
-    UIALLIGMENT_BOTTOMRIGHT, (HeroInt2){0,0},(HeroInt2){1280,720});
-  heroFontUnload(font);
-
-  return widget;
-}
-
-static UIWidget* widgetConstructPlayMenu(GameMenu* menu)
-{
-  UIWidget* widget = uiWidgetCreate();
-
-  widget->buttonNumber = 5;
-  widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
-  widget->buttons[0] = uiButtonCreate(menu->textures[2], (HeroInt2){50,50},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[0], backToMenuClick, menu);
-
-  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 32);
-
-  widget->labelNumber = 4;
-  widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
-
-  int y = 150;
-  for(int i = 0; i < 4; i++)
-  {
-    widget->buttons[i+1] = uiButtonCreate(menu->textures[4], (HeroInt2){50,y},(HeroInt2){386,64});
-    uiButtonSetClickFunc(widget->buttons[i+1], gameClick, menu->levelsPaths[i]);
-
-    char* name = gameFileGetName(menu->levelsPaths[i]);
-    widget->labels[i] = uiLabelCreate(name, font, (HeroColor){255,255,255,255},
-      UIALLIGMENT_CENTER, (HeroInt2){50,y},(HeroInt2){386,64});
-    free(name);
-    y+= 84;
-  }
-
-  heroFontUnload(font);
-
-  return widget;
 }

@@ -134,6 +134,8 @@ void gameBricksLoadLevel(GameBricks* bricks, const char* path)
 
 void gameBricksResolveChange(GameBricks* bricks, int index)
 {
+  if(index < 0) return;
+
   int id = bricks->currentIds[index] - 1;
   switch(id)
   {
@@ -149,7 +151,7 @@ void gameBricksResolveChange(GameBricks* bricks, int index)
     break;
     case 7:
       bricks->datas[index].arg1--;
-      bricks->currentIds[index] = 8;
+      bricks->currentIds[index] = 9;
       break;
     case 8:
       bricks->datas[index].arg1--;

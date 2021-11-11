@@ -39,5 +39,6 @@ typedef struct
 void* gameMenuInit();
 void gameMenuUpdate(void* ptr);
 void gameMenuDestroy(void* ptr);
+void gameChangeState(GameMenu* menu, MenuState state);
 
 #endif

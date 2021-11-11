@@ -1,6 +1,7 @@
 #include"Game/play.h"
 #include"Game/state.h"
 #include"Game/sharedata.h"
+#include"Game/playWidget.h"
 
 #include<stdlib.h>
 #include<stdio.h>
@@ -12,10 +13,6 @@ static void dumpPlayData(GamePlay* play);
 
 static void update(GamePlay* play, double deltaTime);
 static void draw(GamePlay* play);
-
-static void conctructPauseWidget(GamePlay* play);
-static void playBtnClick(void* arg);
-static void quitBtnClick(void* arg);
 
 void* gamePlayInit()
 {
@@ -167,31 +164,6 @@ void gamePlayRestart(GamePlay* play)
   play->started = false;
   play->paused = false;
   play->racket->position = (HeroFloat2){ 604.0f, 695.0f};
-}
-
-static void conctructPauseWidget(GamePlay* play)
-{
-  play->pauseWidget = uiWidgetCreate();
-  play->pauseWidget->visible = false;
-  play->pauseWidget->buttonNumber = 2;
-  play->pauseWidget->buttons = (UIButton**)malloc(play->pauseWidget->buttonNumber * sizeof(UIButton*));
-  play->pauseWidget->buttons[0] = uiButtonCreate(play->pauseTextures[0], (HeroInt2){420,286},(HeroInt2){386,64});
-  uiButtonSetClickFunc(play->pauseWidget->buttons[0], playBtnClick, play);
-  play->pauseWidget->buttons[1] = uiButtonCreate(play->pauseTextures[1], (HeroInt2){420,370},(HeroInt2){386,64});
-  uiButtonSetClickFunc(play->pauseWidget->buttons[1], quitBtnClick, play);
-}
-
-static void playBtnClick(void* arg)
-{
-  GamePlay* play = (GamePlay*)arg;
-  play->paused = !play->paused;
-  play->pauseWidget->visible = play->paused;
-}
-
-static void quitBtnClick(void* arg)
-{
-  GameState* state = heroCoreModuleGet(core, "state");
-  gameStateChange(state, GAMESTATE_MENU);
 }
 
 DEBUG_CODE( 
