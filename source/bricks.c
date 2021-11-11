@@ -5,6 +5,8 @@
 #include<math.h>
 #include<stdio.h>
 
+static void addBrickEvent(GameBricks* bricks, uint32_t index, BrickEventType type);
+
 GameBricks* gameBricksCreate()
 {
   GameBricks* bricks = (GameBricks*)malloc(sizeof(GameBricks));
@@ -24,6 +26,10 @@ GameBricks* gameBricksCreate()
       bricks->colliders[index].size = size;
     }
   }
+
+  bricks->events = (BrickEvent*)malloc(BRICKEVENTS_CAPACITY * sizeof(BrickEvent));
+  bricks->eventsCapacity = BRICKEVENTS_CAPACITY;
+  bricks->eventsNumber = 0;
 
   return bricks;
 }
@@ -50,6 +56,8 @@ void gameBricksDraw(const GameBricks* bricks, HeroSpriteBatch* spriteBatch)
 
 void gameBricksDestory(GameBricks* bricks)
 {
+  free(bricks->events);
+
   gameSpriteSheetUnload(bricks->spriteSheet);
   free(bricks);
 }
@@ -146,36 +154,25 @@ void gameBricksResolveChange(GameBricks* bricks, int index)
     case 4:
     case 5:
     case 6:
+    case 10:
+    case 11:
       bricks->currentIds[index] = 0;
       bricks->currentCount--;
     break;
     case 7:
-      bricks->datas[index].arg1--;
       bricks->currentIds[index] = 9;
       break;
     case 8:
-      bricks->datas[index].arg1--;
       bricks->currentIds[index] = 0;
       bricks->currentCount--;
       break;
     case 9: //indestructible
       break;
-  }
-}
-
-void gameBricksDataSet(GameBricks* bricks)
-{
-  for(int i = 0; i < BRICKS_COUNT; i++)
-  {
-    switch(i)
-    {
-      case 7:
-        bricks->datas[i].arg1 = 2;
-        break;
-      case 8:
-        bricks->datas[i].arg1 = 1;
-        break;
-    }
+    case 12:
+      addBrickEvent(bricks, index, BRICK_EVENT_EXPLOSION);
+      bricks->currentIds[index] = 0;
+      bricks->currentCount--;
+      break;
   }
 }
 
@@ -183,7 +180,11 @@ void gameBricksReset(GameBricks* bricks)
 {
   memcpy(bricks->currentIds, bricks->ids, BRICKS_BLOCK_SIZE);
   bricks->currentCount = bricks->count;
-  gameBricksDataSet(bricks);
+
+  bricks->eventsNumber = 0;
+  bricks->eventsCapacity = BRICKEVENTS_CAPACITY;
+  bricks->events = (BrickEvent*)realloc(bricks->events, bricks->eventsCapacity*sizeof(BrickEvent));
+  memset(bricks->events, 0 , bricks->eventsCapacity * sizeof(BrickEvent));
 }
 
 void gameBricksAnimation(GameBricks* bricks)
@@ -200,5 +201,89 @@ void gameBricksAnimation(GameBricks* bricks)
         bricks->currentIds[i] = 11;
         break;
     }
+  }
+}
+
+static void addBrickEvent(GameBricks* bricks, uint32_t index, BrickEventType type)
+{
+  int freeIndex = -1;
+  for(int i = 0; i < bricks->eventsNumber; i++)
+  {
+    if(bricks->events[i].index == index)
+    {
+      return;
+    }
+    if(bricks->events[i].type == BRICK_EVENT_NONE)
+    {
+      freeIndex = i;
+      break;
+    }
+  }
+
+  if(freeIndex >= 0)
+  {
+    bricks->events[freeIndex].type = type;
+    bricks->events[freeIndex].index = index;
+    switch (type)
+    {
+    case BRICK_EVENT_EXPLOSION:
+      bricks->events[freeIndex].timer = EXPLOSION_TIMER;
+      break;
+    }
+    return;
+  }
+
+  if(bricks->eventsNumber >= bricks->eventsCapacity)
+  {
+    bricks->eventsCapacity += BRICKEVENTS_CAPACITY;
+    bricks->events = (BrickEvent*)realloc(bricks->events, bricks->eventsCapacity*sizeof(BrickEvent));
+  }
+
+  bricks->events[bricks->eventsNumber].type = type;
+  bricks->events[bricks->eventsNumber].index = index;
+  switch (type)
+    {
+    case BRICK_EVENT_EXPLOSION:
+      bricks->events[bricks->eventsNumber].timer = EXPLOSION_TIMER;
+      break;
+    }
+  bricks->eventsNumber++;
+}
+
+void gameBricksEvents(GameBricks* bricks, double deltaTime)
+{
+  for(int i = 0; i < bricks->eventsNumber; i++)
+  {
+    if(bricks->events[i].type == BRICK_EVENT_NONE)
+    {
+      continue;
+    }
+
+    if(bricks->events[i].timer <= 0.0f)
+    {
+      switch(bricks->events[i].type)
+      {
+        case BRICK_EVENT_EXPLOSION:
+          for(int y = -1; y <= 1; y++)
+          {
+            for(int x = -1; x <= 1; x++)
+            {
+              int idY = bricks->events[i].index / BRICKS_COLUMNS + y;
+              if(idY < 0 || idY >= BRICKS_ROWS) continue;
+              int idX = bricks->events[i].index % BRICKS_COLUMNS + x;
+              if(idX < 0 || idX >= BRICKS_COLUMNS) continue;
+              int id = bricks->events[i].index + BRICKS_COLUMNS*y + x;
+              if(bricks->events[i].index != id)
+              {
+                gameBricksResolveChange(bricks, id);
+              }
+            }
+          }
+          break;
+      }
+      bricks->events[i].type = BRICK_EVENT_NONE;
+      continue;
+    }
+    bricks->events[i].timer -= (float)deltaTime;
   }
 }

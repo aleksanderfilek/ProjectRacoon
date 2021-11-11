@@ -10,3 +10,4 @@ Brick 9 - 1 strength
 Brick 10 - indestructible
 Lava 1
 Lava 2
+Explosives

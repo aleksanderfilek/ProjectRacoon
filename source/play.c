@@ -117,6 +117,8 @@ static void update(GamePlay* play, double deltaTime)
     gameBricksAnimation(play->bricks);
   }
 
+  gameBricksEvents(play->bricks, deltaTime);
+
   // restart
   if(heroInputKeyDown(play->input, HERO_KEYCODE_R))
   {
@@ -207,6 +209,13 @@ void* gameDebugPlayInit(HeroWindow* window, HeroInput* input,
 
     heroWindowSetBackgroundColor(play->window, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
+    play->sounds[0] = heroAudioSoundLoad("assets/sounds/beep1.mp3");
+    play->sounds[1] = heroAudioSoundLoad("assets/sounds/beep2.mp3");
+    play->currentSound = 0;
+
+    play->animationTimer = 0.0f;
+
+
   return play;
 } 
 
@@ -240,11 +249,29 @@ void gameDebugPlayDraw(GamePlay* play)
 void gameDebugPlayUpdate(GamePlay* play)
 {
   double deltaTime = heroCoreGetDeltaTime(core);
+
+  // dump data
+  if(heroInputKeyDown(play->input, HERO_KEYCODE_Q))
+  {
+    dumpPlayData(play);
+  }
+
+  play->animationTimer += (float)deltaTime;
+  if(play->animationTimer >= ANIMATION_FRAME_TIME)
+  {
+    play->animationTimer = 0.0f;
+    gameBricksAnimation(play->bricks);
+  }
+
+  gameBricksEvents(play->bricks, deltaTime);
+
+  // restart
   if(heroInputKeyDown(play->input, HERO_KEYCODE_R))
   {
     gamePlayRestart(play);
   }
 
+  // update racket
   racketUpdate(play->racket, deltaTime, play->input);
 
   if(play->started == false)
@@ -262,8 +289,18 @@ void gameDebugPlayUpdate(GamePlay* play)
     gamePlayRestart(play);
   }
 
-  racketBallBounce(play->racket, play->ball);
-  gameBricksCheckCollisions(play->bricks, play->ball);
+  bool collided = racketBallBounce(play->racket, play->ball);
+  int brickIndex = gameBricksCheckCollisions(play->bricks, play->ball);
+  collided |= brickIndex >= 0;
+
+  gameBricksResolveChange(play->bricks, brickIndex);
+
+  if(collided == true)
+  {
+    heroAudioSoundPlay(play->sounds[play->currentSound], false);
+    play->currentSound++;
+    play->currentSound %= 2;
+  }
 }
   )
 
@@ -271,7 +308,10 @@ static void dumpPlayData(GamePlay* play)
 {
   FILE* output = fopen("dump.txt", "w");
 
-  fprintf(output, "Racket\n");
+  fprintf(output, "Play\n");
+  fprintf(output, "Animation timer: %f\n", play->animationTimer);
+
+  fprintf(output, "\nRacket\n");
   fprintf(output, "\tPosition (%f, %f)\n", play->racket->position.x, play->racket->position.y);
   fprintf(output, "\tSpeed modifier: %f\n", play->racket->speedModifier);
 
@@ -300,6 +340,13 @@ static void dumpPlayData(GamePlay* play)
       fprintf(output, " %d", play->bricks->ids[i]);
     }
     fprintf(output, "\n");
+  }
+
+  fprintf(output, "\nBricks events\n");
+  for(int i = 0; i < play->bricks->eventsNumber; i++)
+  {
+    fprintf(output, "\tid: %d, typeNum: %d, timer: %f\n", play->bricks->events[i].index, 
+      play->bricks->events[i].type, play->bricks->events[i].timer);
   }
 
   fclose(output);
