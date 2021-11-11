@@ -9,6 +9,7 @@
     "spritesheet.h": "c",
     "stdio.h": "c",
     "leveleditorwidget.h": "c",
-    "h_files.h": "c"
+    "h_files.h": "c",
+    "profiler.h": "c"
   }
 }

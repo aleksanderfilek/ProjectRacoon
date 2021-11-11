@@ -1,6 +1,7 @@
 #include"Hero/Hero.h"
 #include"Game/state.h"
 #include"Game/sharedata.h"
+#include"Game/profiler.h"
 
 HeroCore* core = NULL;
 
@@ -31,6 +32,9 @@ int main(int argc, char *argv[])
     void* sharedata = gameShareDataInit(1);
     gameSharedDataAdd(sharedata, "level", NULL, NULL);
     heroCoreModuleAdd(core, "data", sharedata, NULL, gameShareDataDestroy);
+
+    // DEBUG_CODE( void* profiler = profilerInit();
+    // heroCoreModuleAdd(core, "profiler", profiler, profilerUpdate, profilerDestory); )
   }
 
   heroCoreStart(core);

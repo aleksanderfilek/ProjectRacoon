@@ -72,6 +72,7 @@ bool gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
       if(collision.collided == true)
       {
         bricks->currentIds[index] = 0;
+        bricks->currentCount--;
         int edge = collisionEdgeVariant(collision.direction);
         if(edge == 1 || edge == 3)
         {
@@ -140,6 +141,11 @@ void gameBricksLoadLevel(GameBricks* bricks, const char* path)
   }
 
   fread(bricks->ids, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
+
+  for(int i = 0; i < BRICKS_COLUMNS * BRICKS_ROWS; i++)
+  {
+    bricks->count++;
+  }
 
   fclose(file);
 }

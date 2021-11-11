@@ -153,6 +153,7 @@ void gamePlayRestart(GamePlay* play)
 {
   printf("[Play] Game resterted\n");
   memcpy(play->bricks->currentIds, play->bricks->ids, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
+  play->bricks->currentCount = play->bricks->count;
   play->started = false;
   play->paused = false;
   play->racket->position = (HeroFloat2){ 604.0f, 695.0f};

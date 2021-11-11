@@ -18,6 +18,8 @@ typedef struct
   uint8_t ids[BRICKS_ROWS * BRICKS_COLUMNS];
   uint8_t currentIds[BRICKS_ROWS * BRICKS_COLUMNS];
   BoxCollider2D colliders[BRICKS_ROWS * BRICKS_COLUMNS];
+  uint32_t count;
+  uint32_t currentCount;
 }GameBricks;
 
 GameBricks* gameBricksCreate();
