@@ -1,6 +1,8 @@
 #ifndef GAME_PLAY_H_
 #define GAME_PLAY_H_
 
+#define ANIMATION_FRAME_TIME 1.0f
+
 #include<stdbool.h>
 
 #include"Hero/Hero.h"
@@ -31,6 +33,8 @@ typedef struct
 
   HeroSound* sounds[2];
   uint32_t currentSound;
+
+  float animationTimer;
 } GamePlay;
 
 void* gamePlayInit();

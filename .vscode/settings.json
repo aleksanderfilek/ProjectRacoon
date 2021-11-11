@@ -10,6 +10,7 @@
     "stdio.h": "c",
     "leveleditorwidget.h": "c",
     "h_files.h": "c",
-    "profiler.h": "c"
+    "profiler.h": "c",
+    "playwidget.h": "c"
   }
 }

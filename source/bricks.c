@@ -185,3 +185,20 @@ void gameBricksReset(GameBricks* bricks)
   bricks->currentCount = bricks->count;
   gameBricksDataSet(bricks);
 }
+
+void gameBricksAnimation(GameBricks* bricks)
+{
+  for(int i = 0; i < BRICKS_COUNT; i++)
+  {
+    int id = bricks->currentIds[i] - 1;
+    switch(id)
+    {
+      case 10:
+        bricks->currentIds[i] = 12;
+        break;
+      case 11:
+        bricks->currentIds[i] = 11;
+        break;
+    }
+  }
+}

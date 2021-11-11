@@ -49,6 +49,8 @@ void* gamePlayInit()
 
   conctructPauseWidget(play);
 
+  play->animationTimer = 0.0f;
+
   return play;
 }
 
@@ -86,12 +88,13 @@ void gamePlayDestroy(void* ptr)
 
 static void update(GamePlay* play, double deltaTime)
 {
-  
+  // dump data
   if(heroInputKeyDown(play->input, HERO_KEYCODE_Q))
   {
     dumpPlayData(play);
   }
 
+  // pause menu
   if(play->pauseWidget->visible == false)
   {
     if(heroInputKeyDown(play->input, HERO_KEYCODE_ESCAPE))
@@ -104,15 +107,26 @@ static void update(GamePlay* play, double deltaTime)
     uiWidgetUpdate(play->pauseWidget, play->input);
   }
 
+  // pause game
   if(play->paused) return;
 
+  play->animationTimer += (float)deltaTime;
+  if(play->animationTimer >= ANIMATION_FRAME_TIME)
+  {
+    play->animationTimer = 0.0f;
+    gameBricksAnimation(play->bricks);
+  }
+
+  // restart
   if(heroInputKeyDown(play->input, HERO_KEYCODE_R))
   {
     gamePlayRestart(play);
   }
 
+  // update racket
   racketUpdate(play->racket, deltaTime, play->input);
 
+  // 
   if(play->started == false)
   {
     racketPositioning(play->racket, play->ball);

@@ -38,5 +38,6 @@ void gameBricksLoadLevel(GameBricks* bricks, const char* path);
 void gameBricksResolveChange(GameBricks* bricks, int index);
 void gameBricksDataSet(GameBricks* bricks);
 void gameBricksReset(GameBricks* bricks);
+void gameBricksAnimation(GameBricks* bricks);
 
 #endif
