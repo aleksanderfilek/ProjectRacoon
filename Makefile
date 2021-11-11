@@ -7,7 +7,7 @@ LIBDIR = lib
 SOURCES = source/*.c
 OBJECTS = *.o
 BUILDDIR = lib/windows
-TARGET = main
+TARGET = Racoon
 VER ?= debug
 VERFLAGS ?= -g -D DEBUG
 VEREXT ?= d
@@ -24,7 +24,7 @@ ifeq ($(OS),windows)
 	COPY = xcopy /s /e
 	IFEXIST = if exist
 	LIBDIR = lib\windows
-	LIBS = -lhero$(VEREXT) -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm
+	LIBS = -lhero$(VEREXT) -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lsoil -lglew32 -lopengl32 -lglu32 -lm -static-libgcc
 	EXTENSION = .exe
 else
 	OS = linux
@@ -33,7 +33,7 @@ else
 	MKDIR = mkdir -p
 	COPY = cp -R
 	LIBDIR = lib
-	LIBS = -lhero$(VEREXT) -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm
+	LIBS = -lhero$(VEREXT) -lSDL2main -lSDL2 -lSDL2_ttf -lSDL2_mixer -lSOIL -lGLEW -lGL -lGLU -lm -static-libgcc
 endif
 
 build: clear pack compile link clean

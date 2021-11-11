@@ -80,7 +80,7 @@ bool racketBallBounce(GameRacket* racket, GameBall* ball)
     ball->velocity.x = 100.0f * percentage * strength;
     ball->velocity.y = -ball->velocity.y;
     ball->velocity = heroMathMultiplyF2(heroMathNormalizeF2(ball->velocity), heroMathLengthF2(oldVelocity));
-    
+    ball->position.y = racket->position.y - racket->size.y;
     return true;
   }
   return false;
