@@ -5,3 +5,6 @@ Brick 4 - Normal brick
 Brick 5 - Normal brick
 Brick 6 - Normal brick
 Brick 7 - Normal brick
+Brick 8 - 2 strength
+Brick 9 - 1 strength
+Brick 10 - indestructible

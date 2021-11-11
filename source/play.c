@@ -8,6 +8,8 @@
 
 extern HeroCore* core;
 
+static void dumpPlayData(GamePlay* play);
+
 static void update(GamePlay* play, double deltaTime);
 static void draw(GamePlay* play);
 
@@ -38,7 +40,7 @@ void* gamePlayInit()
   play->bricks = gameBricksCreate();
 
   GameSharedDataSystem* sharedata = heroCoreModuleGet(core, "data");
-  const char* path = gameSharedDataGet(sharedata, "level");
+  char* path = gameSharedDataGet(sharedata, "level");
   gameBricksLoadLevel(play->bricks, path);
 
   gamePlayRestart(play);
@@ -88,6 +90,11 @@ void gamePlayDestroy(void* ptr)
 static void update(GamePlay* play, double deltaTime)
 {
   
+  if(heroInputKeyDown(play->input, HERO_KEYCODE_Q))
+  {
+    dumpPlayData(play);
+  }
+
   if(play->pauseWidget->visible == false)
   {
     if(heroInputKeyDown(play->input, HERO_KEYCODE_ESCAPE))
@@ -125,7 +132,11 @@ static void update(GamePlay* play, double deltaTime)
   }
 
   bool collided = racketBallBounce(play->racket, play->ball);
-  collided |= gameBricksCheckCollisions(play->bricks, play->ball);
+  int brickIndex = gameBricksCheckCollisions(play->bricks, play->ball);
+  collided |= brickIndex >= 0;
+
+  gameBricksResolveChange(play->bricks, brickIndex);
+
   if(collided == true)
   {
     heroAudioSoundPlay(play->sounds[play->currentSound], false);
@@ -152,8 +163,7 @@ static void draw(GamePlay* play)
 void gamePlayRestart(GamePlay* play)
 {
   printf("[Play] Game resterted\n");
-  memcpy(play->bricks->currentIds, play->bricks->ids, BRICKS_COLUMNS*BRICKS_ROWS*sizeof(uint8_t));
-  play->bricks->currentCount = play->bricks->count;
+  gameBricksReset(play->bricks);
   play->started = false;
   play->paused = false;
   play->racket->position = (HeroFloat2){ 604.0f, 695.0f};
@@ -270,3 +280,41 @@ void gameDebugPlayUpdate(GamePlay* play)
   gameBricksCheckCollisions(play->bricks, play->ball);
 }
   )
+
+static void dumpPlayData(GamePlay* play)
+{
+  FILE* output = fopen("dump.txt", "w");
+
+  fprintf(output, "Racket\n");
+  fprintf(output, "\tPosition (%f, %f)\n", play->racket->position.x, play->racket->position.y);
+  fprintf(output, "\tSpeed modifier: %f\n", play->racket->speedModifier);
+
+  fprintf(output, "\nBall\n");
+  fprintf(output, "\tPosition (%f, %f)\n", play->ball->position.x, play->ball->position.y);
+  fprintf(output, "\tSpeed modifier: %f\n", play->ball->speedModifier);
+  fprintf(output, "\tVelocity (%f, %f)\n", play->ball->velocity.x, play->ball->velocity.y);
+
+  fprintf(output, "\nBricks current ids\n");
+  for(int y = 0; y < BRICKS_ROWS; y++)
+  {
+    for(int x = 0; x < BRICKS_COLUMNS; x++)
+    {
+      int i = BRICKS_COLUMNS * y + x;
+      fprintf(output, " %d", play->bricks->currentIds[i]);
+    }
+    fprintf(output, "\n");
+  }
+
+  fprintf(output, "\nBricks ids\n");
+  for(int y = 0; y < BRICKS_ROWS; y++)
+  {
+    for(int x = 0; x < BRICKS_COLUMNS; x++)
+    {
+      int i = BRICKS_COLUMNS * y + x;
+      fprintf(output, " %d", play->bricks->ids[i]);
+    }
+    fprintf(output, "\n");
+  }
+
+  fclose(output);
+}

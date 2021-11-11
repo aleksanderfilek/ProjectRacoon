@@ -20,7 +20,6 @@ GameSpriteSheet* gameSpriteSheetLoad(const char* path)
   char* texturePath = (char*)malloc(size* sizeof(char)); // may cause memory leak, if hero texture not free memory
   fread(texturePath, sizeof(char), size, srcFile);
   fread(&spriteSheet->length, sizeof(uint32_t), 1, srcFile); // get tiles count
-
   spriteSheet->names = (char**)malloc(spriteSheet->length * sizeof(char*));
   spriteSheet->rects = (HeroInt4*)malloc(spriteSheet->length * sizeof(HeroInt4));
   for(int i = 0; i < spriteSheet->length; i++)

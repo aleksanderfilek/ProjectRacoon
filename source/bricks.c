@@ -56,7 +56,7 @@ void gameBricksDestory(GameBricks* bricks)
 
 static int collisionEdgeVariant(HeroFloat2 vector);
 
-bool gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
+int gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
 {
   for(int y = 0; y < BRICKS_ROWS; y++)
   {
@@ -71,41 +71,23 @@ bool gameBricksCheckCollisions(GameBricks* bricks, GameBall* ball)
       Collision collision = detectBoxCircleCollision(&bricks->colliders[index], &ball->collider);
       if(collision.collided == true)
       {
-        bricks->currentIds[index] = 0;
-        bricks->currentCount--;
         int edge = collisionEdgeVariant(collision.direction);
         if(edge == 1 || edge == 3)
         {
-          ball->velocity.x = -ball->velocity.x;
-          float penetration = ball->collider.radius * fabs(collision.direction.x);
-          if(edge == 1)
-          {
-            ball->position.x -= penetration;
-          }
-          else
-          {
-            ball->position.x += penetration;
-          }
+          ball->velocity.x = -ball->velocity.x;          
         }
         else
         {
           ball->velocity.y = -ball->velocity.y;
-          float penetration = ball->collider.radius * fabs(collision.direction.y);
-          if(edge == 0)
-          {
-            ball->position.y -= penetration;
-          }
-          else
-          {
-            ball->position.y += penetration;
-          }
         }
-        return true;
+        HeroFloat2 shiftVector = heroMathMultiplyF2(collision.direction, -1.0f);
+        ball->position = heroMathAddF2(ball->position, shiftVector);
+        return index;
       }
     }
   }
 
-  return false;
+  return -1;
 }
 
 static int collisionEdgeVariant(HeroFloat2 vector)
@@ -133,7 +115,7 @@ static int collisionEdgeVariant(HeroFloat2 vector)
 
 void gameBricksLoadLevel(GameBricks* bricks, const char* path)
 {
-  printf("[Bricks] Load level, path:%s\n", path);
+  printf("[Bricks] Load level, path: %s\n", path);
   FILE* file = fopen(path, "rb");
   if(file == NULL)
   {
@@ -148,4 +130,56 @@ void gameBricksLoadLevel(GameBricks* bricks, const char* path)
   }
 
   fclose(file);
+}
+
+void gameBricksResolveChange(GameBricks* bricks, int index)
+{
+  int id = bricks->currentIds[index] - 1;
+  switch(id)
+  {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+      bricks->currentIds[index] = 0;
+      bricks->currentCount--;
+    break;
+    case 7:
+      bricks->datas[index].arg1--;
+      bricks->currentIds[index] = 8;
+      break;
+    case 8:
+      bricks->datas[index].arg1--;
+      bricks->currentIds[index] = 0;
+      bricks->currentCount--;
+      break;
+    case 9: //indestructible
+      break;
+  }
+}
+
+void gameBricksDataSet(GameBricks* bricks)
+{
+  for(int i = 0; i < BRICKS_COUNT; i++)
+  {
+    switch(i)
+    {
+      case 7:
+        bricks->datas[i].arg1 = 2;
+        break;
+      case 8:
+        bricks->datas[i].arg1 = 1;
+        break;
+    }
+  }
+}
+
+void gameBricksReset(GameBricks* bricks)
+{
+  memcpy(bricks->currentIds, bricks->ids, BRICKS_BLOCK_SIZE);
+  bricks->currentCount = bricks->count;
+  gameBricksDataSet(bricks);
 }

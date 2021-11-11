@@ -40,6 +40,18 @@ void gameSharedDataAdd(GameSharedDataSystem* system, const char* name,
     {
       if(strcmp(data->name, name) == 0)
       {
+        if(data->data != NULL)
+        {
+          if(data->delteFunc == NULL)
+          {
+            free(data->data);
+          }
+          else
+          {
+            data->delteFunc(data->data);
+          }
+        }
+
         data->data = variable;
         data->delteFunc = delteFunc;
         return;

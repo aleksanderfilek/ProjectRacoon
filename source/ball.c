@@ -68,7 +68,7 @@ static bool bounceWall(GameBall* ball)
     ball->velocity.y = -ball->velocity.y;
     ball->position.y = 15.0f;
   }
-  else if(ball->position.y > 695.0f)
+  else if(ball->position.y > 720.0f)
   {
     return false;
   }

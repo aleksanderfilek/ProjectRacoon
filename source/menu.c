@@ -145,8 +145,9 @@ static void gameClick(void* arg)
   GameState* state = heroCoreModuleGet(core, "state");
   gameStateChange(state, GAMESTATE_PLAY);
 
+  char* path = strdup((char*)arg);
   GameSharedDataSystem* sharedata = heroCoreModuleGet(core, "data");
-  gameSharedDataAdd(sharedata, "level", arg, NULL);
+  gameSharedDataAdd(sharedata, "level", path, NULL);
 }
 
 static UIWidget* widgetConstructMainMenu(GameMenu* menu)

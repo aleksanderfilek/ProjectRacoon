@@ -18,7 +18,6 @@ typedef struct
 
   CircleCollider2D collider;
 
-  HeroFloat2 direction;
   HeroFloat2 velocity;
   float speedModifier;
 }GameBall;

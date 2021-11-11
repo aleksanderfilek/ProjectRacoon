@@ -29,7 +29,6 @@ void* gameLevelEditorInit()
   levelEditor->bricks = gameBricksCreate();
   memset(levelEditor->bricks->ids, 0, sizeof(levelEditor->bricks->ids));
 
-
   levelEditor->input = heroCoreModuleGet(core, "input");
 
   levelEditor->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
@@ -266,6 +265,7 @@ static void loadBricksInfo(GameLevelEditor* levelEditor)
   }
 
   fclose(file);
+
 }
 
 static void selectBrick(GameLevelEditor* levelEditor, uint32_t index)
