@@ -1,6 +1,7 @@
 #include"Game/file.h"
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 
 #define SLASH "/"
 
@@ -49,8 +50,7 @@ char** gameFileGetInDirectory(const char* directoryPath, uint32_t* length)
   {
       //Find first file will always return "."
       //    and ".." as the first two directories.
-      if(strcmp(fdFile.cFileName, ".") != 0
-              && strcmp(fdFile.cFileName, "..") != 0)
+      if(strcmp(fdFile.cFileName, ".") != 0 && strcmp(fdFile.cFileName, "..") != 0)
       {
           //Build up our file path using the passed in
           //  [directoryPath] and the file/foldername we just found:
@@ -76,7 +76,33 @@ char** gameFileGetInDirectory(const char* directoryPath, uint32_t* length)
 
   return files;
   #else
-  printf("PROBLEM! Function gameFileGetInDirectory works only on windows!\n");
-  exit(-1);
+  char sPath[2048];
+  char** files = (char**)malloc(sizeof(char*));
+  files[0] = NULL;
+  int fileNumber = 0;
+
+  DIR *d;
+  struct dirent *dir;
+  d = opendir(directoryPath);
+  if (d) {
+    while ((dir = readdir(d)) != NULL) {
+      if(strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0)
+      {
+        sprintf(sPath, "%s/%s", directoryPath, dir->d_name);
+        files[fileNumber] = strdup(sPath);
+        fileNumber++;
+        files = (char**)realloc(files, (fileNumber + 1) * sizeof(char*));
+        files[fileNumber] = NULL;
+      }
+    }
+    closedir(d);
+  }
+
+  if(length)
+  {
+    *length = fileNumber;
+  }
+
+  return files;
   #endif
 }
