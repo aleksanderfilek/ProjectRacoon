@@ -141,6 +141,7 @@ static void update(GamePlay* play, double deltaTime)
   
   if(!ballUpdate(play->ball, deltaTime))
   {
+    printf("[Play] Game Failed\n");
     gamePlayRestart(play);
   }
 
@@ -155,6 +156,13 @@ static void update(GamePlay* play, double deltaTime)
     heroAudioSoundPlay(play->sounds[play->currentSound], false);
     play->currentSound++;
     play->currentSound %= 2;
+  }
+
+  if(play->bricks->currentCount == 0)
+  {
+    printf("[Play] Game won\n");
+    GameState* state = heroCoreModuleGet(core, "state");
+    gameStateChange(state, GAMESTATE_MENU);
   }
 }
 
