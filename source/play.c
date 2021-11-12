@@ -22,8 +22,9 @@ void* gamePlayInit()
   play->sdlWindow = heroWindowGetSdlWindow(play->window);
   play->input = heroCoreModuleGet(core, "input");
 
-  play->pauseTextures[0] = heroTextureLoad("assets/sprites/playBtn.png", 0);
-  play->pauseTextures[1] = heroTextureLoad("assets/sprites/quitBtn.png", 0);
+  play->btnTextures[0] = heroTextureLoad("assets/sprites/playBtn.png", 0);
+  play->btnTextures[1] = heroTextureLoad("assets/sprites/quitBtn.png", 0);
+  play->btnTextures[2] = heroTextureLoad("assets/sprites/levelBtn.png", 0);
 
   play->sounds[0] = heroAudioSoundLoad("assets/sounds/beep1.mp3");
   play->sounds[1] = heroAudioSoundLoad("assets/sounds/beep2.mp3");
@@ -47,7 +48,11 @@ void* gamePlayInit()
 
   heroWindowSetBackgroundColor(play->window, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
-  conctructPauseWidget(play);
+
+  play->currentWidget = PLAY_STATE_GAME;
+  play->widgets[0] = conctructPauseWidget(play);
+  play->widgets[1] = constructFailedWidget(play);
+  play->widgets[2] = constructWinWidget(play);
 
   play->animationTimer = 0.0f;
 
@@ -72,9 +77,14 @@ void gamePlayDestroy(void* ptr)
   heroAudioSoundUnload(play->sounds[0]);
   heroAudioSoundUnload(play->sounds[1]);
 
-  uiWidgetDestroy(play->pauseWidget);
-  heroTextureUnload(play->pauseTextures[0]);
-  heroTextureUnload(play->pauseTextures[1]);
+  for(int i = 0; i < 3; i++)
+  {
+    uiWidgetDestroy(play->widgets[i]);
+  }
+
+  heroTextureUnload(play->btnTextures[0]);
+  heroTextureUnload(play->btnTextures[1]);
+  heroTextureUnload(play->btnTextures[2]);
 
   heroSpriteBatchDestroy(play->spriteBatch);
   heroShaderUnload(play->shader);
@@ -94,17 +104,15 @@ static void update(GamePlay* play, double deltaTime)
     dumpPlayData(play);
   }
 
+  if(play->currentWidget > PLAY_STATE_GAME) uiWidgetUpdate(play->widgets[play->currentWidget-1], play->input);
+
   // pause menu
-  if(play->pauseWidget->visible == false)
+  if(play->currentWidget == PLAY_STATE_GAME)
   {
     if(heroInputKeyDown(play->input, HERO_KEYCODE_ESCAPE))
     {
-      playBtnClick(play);
+      setPlayState(play, PLAY_STATE_PAUSE);
     }
-  }
-  else
-  {
-    uiWidgetUpdate(play->pauseWidget, play->input);
   }
 
   // pause game
@@ -142,7 +150,7 @@ static void update(GamePlay* play, double deltaTime)
   if(!ballUpdate(play->ball, deltaTime))
   {
     printf("[Play] Game Failed\n");
-    gamePlayRestart(play);
+    setPlayState(play, PLAY_STATE_FAILED);
   }
 
   bool collided = racketBallBounce(play->racket, play->ball);
@@ -158,11 +166,10 @@ static void update(GamePlay* play, double deltaTime)
     play->currentSound %= 2;
   }
 
-  if(play->bricks->currentCount == 0)
+  if(play->bricks->currentCount <= 0)
   {
     printf("[Play] Game won\n");
-    GameState* state = heroCoreModuleGet(core, "state");
-    gameStateChange(state, GAMESTATE_MENU);
+    setPlayState(play, PLAY_STATE_WIN);
   }
 }
 
@@ -175,7 +182,8 @@ static void draw(GamePlay* play)
   gameBricksDraw(play->bricks, play->spriteBatch);
   ballDraw(play->ball, play->spriteBatch);
   racketDraw(play->racket, play->spriteBatch);
-  uiWidgetDraw(play->pauseWidget, play->spriteBatch);
+
+  if(play->currentWidget > PLAY_STATE_GAME) uiWidgetDraw(play->widgets[play->currentWidget-1], play->spriteBatch);
 
   heroSpriteBatchEnd(play->spriteBatch);
   SDL_GL_SwapWindow(play->sdlWindow);
@@ -328,24 +336,29 @@ static void dumpPlayData(GamePlay* play)
   fprintf(output, "\tSpeed modifier: %f\n", play->ball->speedModifier);
   fprintf(output, "\tVelocity (%f, %f)\n", play->ball->velocity.x, play->ball->velocity.y);
 
-  fprintf(output, "\nBricks current ids\n");
+  fprintf(output, "\nBricks\n");
+  fprintf(output, "\tCount %d\n", play->bricks->count);
+  fprintf(output, "\tCurrent count %d\n", play->bricks->currentCount);
+  fprintf(output, "\n\tCurrent ids\n");
   for(int y = 0; y < BRICKS_ROWS; y++)
   {
+    fprintf(output, "\t");
     for(int x = 0; x < BRICKS_COLUMNS; x++)
     {
       int i = BRICKS_COLUMNS * y + x;
-      fprintf(output, " %d", play->bricks->currentIds[i]);
+      fprintf(output, " %2d", play->bricks->currentIds[i]);
     }
     fprintf(output, "\n");
   }
 
-  fprintf(output, "\nBricks ids\n");
+  fprintf(output, "\n\tIds\n");
   for(int y = 0; y < BRICKS_ROWS; y++)
   {
+    fprintf(output, "\t");
     for(int x = 0; x < BRICKS_COLUMNS; x++)
     {
       int i = BRICKS_COLUMNS * y + x;
-      fprintf(output, " %d", play->bricks->ids[i]);
+      fprintf(output, " %2d", play->bricks->ids[i]);
     }
     fprintf(output, "\n");
   }
@@ -358,4 +371,10 @@ static void dumpPlayData(GamePlay* play)
   }
 
   fclose(output);
+}
+
+void setPlayState(GamePlay* play, PlayStateEnum state)
+{
+  if(state > PLAY_STATE_GAME) play->paused = true;
+  play->currentWidget = state;
 }

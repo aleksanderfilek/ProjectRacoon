@@ -132,6 +132,7 @@ void gameBricksLoadLevel(GameBricks* bricks, const char* path)
 
   fread(bricks->ids, sizeof(uint8_t), BRICKS_COLUMNS * BRICKS_ROWS, file);
 
+  bricks->count = 0;
   for(int i = 0; i < BRICKS_COLUMNS * BRICKS_ROWS; i++)
   {
     if(bricks->ids[i] > 0)

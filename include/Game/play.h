@@ -12,6 +12,14 @@
 #include"Game/ball.h"
 #include"Game/ui.h"
 
+typedef enum
+{
+    PLAY_STATE_GAME = 0,
+    PLAY_STATE_PAUSE,
+    PLAY_STATE_FAILED,
+    PLAY_STATE_WIN
+} PlayStateEnum;
+
 typedef struct
 {
   HeroWindow* window;
@@ -28,8 +36,11 @@ typedef struct
   bool started;
   bool paused;
 
-  UIWidget* pauseWidget;
-  HeroTexture* pauseTextures[2];
+  UIWidget* gameWidget;
+
+  PlayStateEnum currentWidget;
+  UIWidget* widgets[3];
+  HeroTexture* btnTextures[3];
 
   HeroSound* sounds[2];
   uint32_t currentSound;
@@ -41,6 +52,8 @@ void* gamePlayInit();
 void gamePlayUpdate(void* ptr);
 void gamePlayDestroy(void* ptr);
 void gamePlayRestart(GamePlay* play);
+
+void setPlayState(GamePlay* play, PlayStateEnum state);
 
 DEBUG_CODE( 
 void* gameDebugPlayInit(HeroWindow* window, HeroInput* input, 

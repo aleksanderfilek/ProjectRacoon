@@ -3,18 +3,13 @@
 
 #include"Game/play.h"
 
-typedef enum
-{
-    PLAY_STATE_GAME = 0,
-    PLAY_STATE_PAUSE,
-    PLAY_STATE_FAILED,
-    PLAY_STATE_WIN
-} PlayStateEnum;
+UIWidget* conctructPauseWidget(GamePlay* play);
+UIWidget* constructWinWidget(GamePlay* play);
+UIWidget* constructFailedWidget(GamePlay* play);
 
-void conctructPauseWidget(GamePlay* play);
 void playBtnClick(void* arg);
-void quitBtnClick(void* arg);
-
-
+void backBtnClick(void* arg);
+void nextBtnClick(void* arg);
+void replayBtnClick(void* arg);
 
 #endif
