@@ -16,7 +16,7 @@ GameBall* ballCreate()
 
   ball->collider = (CircleCollider2D){heroFloat2zero, ball->size.x / 2.0f};
 
-  ball->velocity = (HeroFloat2){000.0f, -350.0f};
+  ball->velocity = (HeroFloat2){000.0f, -BALL_SPEED};
   ball->speedModifier = 1.0f;
 
   return ball;

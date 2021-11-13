@@ -11,3 +11,5 @@ Brick 10 - indestructible
 Lava 1
 Lava 2
 Explosives
+Block 1
+Block 2

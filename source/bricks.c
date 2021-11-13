@@ -177,6 +177,12 @@ void gameBricksResolveChange(GameBricks* bricks, int index)
       bricks->currentIds[index] = 0;
       bricks->currentCount--;
       break;
+    case 13:
+      break;
+    case 14:
+      bricks->currentIds[index] = 0;
+      bricks->currentCount--;
+      break;
   }
 }
 
@@ -203,6 +209,12 @@ void gameBricksAnimation(GameBricks* bricks)
         break;
       case 11:
         bricks->currentIds[i] = 11;
+        break;
+      case 13:
+        bricks->currentIds[i] = 15;
+        break;
+      case 14:
+        bricks->currentIds[i] = 14;
         break;
     }
   }

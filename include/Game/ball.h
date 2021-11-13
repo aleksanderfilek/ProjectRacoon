@@ -6,7 +6,7 @@
 #include"Game/spritesheet.h"
 #include"Game/physics.h"
 
-#define BALL_SPEED 200
+#define BALL_SPEED 600
 
 typedef struct
 {

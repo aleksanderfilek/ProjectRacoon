@@ -12,8 +12,6 @@ UIWidget* conctructPauseWidget(GamePlay* play)
 {
   UIWidget* widget = uiWidgetCreate();
 
-  widget->visible = false;
-
   widget->buttonNumber = 2;
   widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
   widget->buttons[0] = uiButtonCreate(play->btnTextures[0], (HeroInt2){420,286},(HeroInt2){386,64});
