@@ -31,7 +31,7 @@ void* gamePlayInit()
   play->currentSound = 0;
 
   play->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
-  play->spriteBatch = heroSpriteBatchInit(play->window, 128, 10, play->shader);
+  play->spriteBatch = heroSpriteBatchInit(play->window, 400, 10, play->shader);
 
   play->racket = racketCreate();
   play->ball = ballCreate();
@@ -48,7 +48,6 @@ void* gamePlayInit()
 
   heroWindowSetBackgroundColor(play->window, (HeroColor){0x1E,0x1E,0x1E,0xFF});
 
-
   play->currentWidget = PLAY_STATE_GAME;
   play->widgets[0] = conctructPauseWidget(play);
   play->widgets[1] = constructFailedWidget(play);
@@ -56,6 +55,8 @@ void* gamePlayInit()
 
   play->animationTimer = 0.0f;
 
+  play->effectsManager = effectsManagerCreate();
+  
   return play;
 }
 
@@ -92,6 +93,8 @@ void gamePlayDestroy(void* ptr)
   racketDestroy(play->racket);
   ballDestroy(play->ball);
   gameBricksDestory(play->bricks);
+
+  effectsManagerDestroy(play->effectsManager);
 
   free(ptr);
 }
@@ -159,6 +162,8 @@ static void update(GamePlay* play, double deltaTime)
 
   gameBricksResolveChange(play->bricks, brickIndex);
 
+  effectsManagerUpdate(play->effectsManager, deltaTime, play->racket);
+
   if(collided == true)
   {
     heroAudioSoundPlay(play->sounds[play->currentSound], false);
@@ -177,11 +182,13 @@ static void draw(GamePlay* play)
 {
   heroWindowSetCurrentContext(play->window);
   glClear(GL_COLOR_BUFFER_BIT);
+
   heroSpriteBatchBegin(play->spriteBatch);
 
   gameBricksDraw(play->bricks, play->spriteBatch);
   ballDraw(play->ball, play->spriteBatch);
   racketDraw(play->racket, play->spriteBatch);
+  effectsManagerDraw(play->effectsManager, play->spriteBatch);
 
   if(play->currentWidget > PLAY_STATE_GAME) uiWidgetDraw(play->widgets[play->currentWidget-1], play->spriteBatch);
 

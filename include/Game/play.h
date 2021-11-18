@@ -11,6 +11,7 @@
 #include"Game/racket.h"
 #include"Game/ball.h"
 #include"Game/ui.h"
+#include"Game/effects.h"
 
 typedef enum
 {
@@ -46,6 +47,8 @@ typedef struct
   uint32_t currentSound;
 
   float animationTimer;
+
+  EffectsManager* effectsManager;
 } GamePlay;
 
 void* gamePlayInit();

@@ -8,11 +8,7 @@
 #define BUFFER_SIZE 4096
 
 #define NAMES \
-  C(func_gameBricksDraw) \
-  C(var_bricksCount) \
-  C(func_swapwindow) \
-  C(func_batchend) \
-  C(func_draw)
+  C(func_gameBricksDraw) 
 
 #define C(x) x,
 enum namesE { NAMES PROFILER_COUNT };
