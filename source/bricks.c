@@ -135,7 +135,8 @@ void gameBricksLoadLevel(GameBricks* bricks, const char* path)
   bricks->count = 0;
   for(int i = 0; i < BRICKS_COLUMNS * BRICKS_ROWS; i++)
   {
-    if(bricks->ids[i] > 0)
+    if(bricks->ids[i] > 0 && bricks->ids[i] != 10 && 
+      bricks->ids[i] != 14 && bricks->ids[i] != 15)
     {
       bricks->count++;
     }
@@ -181,7 +182,6 @@ void gameBricksResolveChange(GameBricks* bricks, int index)
       break;
     case 14:
       bricks->currentIds[index] = 0;
-      bricks->currentCount--;
       break;
   }
 }
