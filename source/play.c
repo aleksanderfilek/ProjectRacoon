@@ -177,13 +177,13 @@ static void update(GamePlay* play, double deltaTime)
     setPlayState(play, PLAY_STATE_WIN);
   }
 }
-
 static void draw(GamePlay* play)
 {
   heroWindowSetCurrentContext(play->window);
   glClear(GL_COLOR_BUFFER_BIT);
 
   heroSpriteBatchBegin(play->spriteBatch);
+
 
   gameBricksDraw(play->bricks, play->spriteBatch);
   ballDraw(play->ball, play->spriteBatch);
