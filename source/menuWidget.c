@@ -7,6 +7,7 @@
 
 #include<stdlib.h>
 #include<stdio.h>
+#include"Game/ui.h"
 
 extern HeroCore* core;
 
@@ -16,14 +17,13 @@ void widgetConstructMainMenu(GameMenu* menu)
 
   UIWidget* widget = menu->widgets[0];
 
-  widget->buttonNumber = 2;
-  widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
+  uiWidgetButtonsNumber(widget, 2);
   widget->buttons[0] = uiButtonCreate(menu->textures[0], (HeroInt2){447,286},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
   widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){447,375},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
-  widget->labelNumber = 1;
-  widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
+
+  uiWidgetLabelsNumber(widget, 1);
   HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 16);
   widget->labels[0] = uiLabelCreate("Created by Aleksander Filek", font, (HeroColor){0,0,0,0},
     UIALLIGMENT_BOTTOMRIGHT, (HeroInt2){0,0},(HeroInt2){1280,720});
@@ -35,15 +35,13 @@ void widgetConstructPlayMenu(GameMenu* menu)
   menu->widgets[1] = uiWidgetCreate();
   UIWidget* widget = menu->widgets[1];
 
-  widget->buttonNumber = 5;
-  widget->buttons = (UIButton**)malloc(widget->buttonNumber * sizeof(UIButton*));
+  uiWidgetButtonsNumber(widget, 5);
   widget->buttons[0] = uiButtonCreate(menu->textures[2], (HeroInt2){447,50},(HeroInt2){386,64});
   uiButtonSetClickFunc(widget->buttons[0], backToMenuClick, menu);
 
   HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 32);
 
-  widget->labelNumber = 4;
-  widget->labels = (UILabel**)malloc(widget->labelNumber * sizeof(UILabel*));
+  uiWidgetLabelsNumber(widget, 4);
 
   int y = 150;
   for(int i = 0; i < 4; i++)

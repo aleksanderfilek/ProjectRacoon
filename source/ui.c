@@ -254,3 +254,21 @@ void uiWidgetDestroy(UIWidget* widget)
   free(widget->labels);
   free(widget);
 }
+
+void uiWidgetButtonsNumber(UIWidget* widget, uint32_t number)
+{
+  widget->buttonNumber = number;
+  widget->buttons = (UIButton**)malloc(number * sizeof(UIButton*));
+}
+
+void uiWidgetImagesNumber(UIWidget* widget, uint32_t number)
+{
+  widget->imageNumber = number;
+  widget->images = (UIImage**)malloc(number * sizeof(UIImage*));
+}
+
+void uiWidgetLabelsNumber(UIWidget* widget, uint32_t number)
+{
+  widget->labelNumber = number;
+  widget->labels = (UILabel**)malloc(number * sizeof(UILabel*));
+}

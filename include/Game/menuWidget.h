@@ -11,6 +11,4 @@ void quitClick();
 void backToMenuClick();
 void gameClick();
 
-
-
 #endif

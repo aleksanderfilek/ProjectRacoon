@@ -3,6 +3,7 @@
 
 #include"Hero/Hero.h"
 
+#include<stdlib.h>
 #include<stdint.h>
 #include<stdbool.h>
 
@@ -88,5 +89,8 @@ UIWidget* uiWidgetCreate();
 void uiWidgetUpdate(UIWidget* widget, HeroInput* input);
 void uiWidgetDraw(UIWidget* widget, HeroSpriteBatch* spriteBatch);
 void uiWidgetDestroy(UIWidget* widget);
+void uiWidgetButtonsNumber(UIWidget* widget, uint32_t number);
+void uiWidgetImagesNumber(UIWidget* widget, uint32_t number);
+void uiWidgetLabelsNumber(UIWidget* widget, uint32_t number);
 
 #endif
