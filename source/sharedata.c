@@ -2,8 +2,9 @@
 
 #include<stdlib.h>
 #include<string.h>
+#include<stdio.h>
 
-static void remove(GameShareData* data);
+static void removeData(GameShareData* data);
 
 GameSharedDataSystem* gameShareDataInit(uint32_t capacity)
 {
@@ -22,7 +23,7 @@ void gameShareDataDestroy(void* ptr)
 
   for(int i = 0; i < system->capacity; i++)
   {
-    remove(&system->datas[i]);
+    removeData(&system->datas[i]);
   }
   free(system->datas);
 
@@ -32,64 +33,43 @@ void gameShareDataDestroy(void* ptr)
 void gameSharedDataAdd(GameSharedDataSystem* system, const char* name, 
   void* variable, void (*delteFunc)(void*))
 {
-  int firstEmpty = -1;
   for(int i = 0; i < system->capacity; i++)
   {
     GameShareData* data = &system->datas[i];
-    if(data->name != NULL)
+    if(data->name == NULL)
     {
-      if(strcmp(data->name, name) == 0)
-      {
-        if(data->data != NULL)
-        {
-          if(data->delteFunc == NULL)
-          {
-            free(data->data);
-          }
-          else
-          {
-            data->delteFunc(data->data);
-          }
-        }
-
-        data->data = variable;
-        data->delteFunc = delteFunc;
-        return;
-      }
+      data->name = strdup(name);
+      data->data = variable;
+      data->delteFunc = delteFunc;  
+      printf("[Share data] Variable %s added to slot %d\n", name, i);
+      return;
     }
-    else if(firstEmpty == -1)
-    {
-      firstEmpty = i;
-    }
-  }
-
-  if(firstEmpty >= 0)
-  {
-    system->datas[firstEmpty].name = strdup(name);
-    system->datas[firstEmpty].data = variable;
-    system->datas[firstEmpty].delteFunc = delteFunc;
-    return;
   }
 
   int index = system->capacity;
   system->capacity++;
   system->datas = (GameShareData*)realloc(system->datas, system->capacity *sizeof(GameShareData));
-  system->datas[firstEmpty].name = strdup(name);
-  system->datas[firstEmpty].data = variable;
-  system->datas[firstEmpty].delteFunc = delteFunc;  
+
+  system->datas[index].name = strdup(name);
+  system->datas[index].data = variable;
+  system->datas[index].delteFunc = delteFunc;  
+  printf("[Share data] Variable %s added\n", name);
 }
 
 void* gameSharedDataGet(GameSharedDataSystem* system, const char* name)
 {
+  printf("[Share data] Variable %s ",name);
   for(int i = 0; i < system->capacity; i++)
   {
     GameShareData* data = &system->datas[i];
-    if(data != NULL && strcmp(data->name, name) == 0)
+    if(data->data != NULL && strcmp(data->name, name) == 0)
     {
+      printf("found\n");
       return data->data;
     }
   }
 
+  printf("not found\n");
   return NULL;
 }
 
@@ -100,17 +80,18 @@ void gameSharedDataRemove(GameSharedDataSystem* system, const char* name)
     GameShareData* data = &system->datas[i];
     if(data != NULL && strcmp(data->name, name) == 0)
     {
-      remove(data);
+      removeData(data);
       return;
     }
   }
 }
 
-static void remove(GameShareData* data)
+static void removeData(GameShareData* data)
 {
   if(data->name != NULL)
   {
     free(data->name);
+    data->name = NULL;
   }
 
   if(data->data == NULL)

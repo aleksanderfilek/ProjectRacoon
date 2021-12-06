@@ -1,85 +1,80 @@
 #include"Game/menuWidget.h"
-#include"Game/state.h"
-#include"Game/file.h"
-#include"Game/sharedata.h"
-
-#include"Hero/Hero.h"
-
-#include<stdlib.h>
-#include<stdio.h>
 #include"Game/ui.h"
+
+#include<stdint.h>
+
+static uint8_t optionsCount[] = {3, 1, 1};
 
 extern HeroCore* core;
 
-void widgetConstructMainMenu(GameMenu* menu)
+void widgetMenuMainConstruct(Menu* menu, HeroFont* font)
 {
-  menu->widgets[0] = uiWidgetCreate();
+    UIWidget* widget = uiWidgetCreate();
+    menu->stateWidgets[0] = widget;
+    widget->visible = false;
 
-  UIWidget* widget = menu->widgets[0];
+    uiWidgetLabelsNumber(menu->stateWidgets[0], 6);
+    widget->labels[0] = uiLabelCreate("Play", font, (HeroColor){0xFF,0xFF,0xFF,0xFF}, 
+        UIALLIGMENT_TOPLEFT, (HeroInt2){100,100}, (HeroInt2){200,30});
+    widget->labels[1] = uiLabelCreate("Play", font, (HeroColor){0xFF,0x00,0x00,0xFF}, 
+        UIALLIGMENT_TOPLEFT, (HeroInt2){101,99}, (HeroInt2){200,30});
+    widget->labels[1]->visible = true;
 
-  uiWidgetButtonsNumber(widget, 2);
-  widget->buttons[0] = uiButtonCreate(menu->textures[0], (HeroInt2){447,286},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[0], playClick, menu);
-  widget->buttons[1] = uiButtonCreate(menu->textures[1], (HeroInt2){447,375},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[1], quitClick, core);
+    widget->labels[2] = uiLabelCreate("Settings", font, (HeroColor){0xFF,0xFF,0xFF,0xFF}, 
+        UIALLIGMENT_TOPLEFT, (HeroInt2){100,140}, (HeroInt2){200,30});
+    widget->labels[3] = uiLabelCreate("Settings", font, (HeroColor){0xFF,0x00,0x00,0xFF}, 
+        UIALLIGMENT_TOPLEFT, (HeroInt2){101,139}, (HeroInt2){200,30});
+    widget->labels[3]->visible = false;
 
-  uiWidgetLabelsNumber(widget, 1);
-  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 16);
-  widget->labels[0] = uiLabelCreate("Created by Aleksander Filek", font, (HeroColor){0,0,0,0},
-    UIALLIGMENT_BOTTOMRIGHT, (HeroInt2){0,0},(HeroInt2){1280,720});
-  heroFontUnload(font);
+    widget->labels[4] = uiLabelCreate("Quit", font, (HeroColor){0xFF,0xFF,0xFF,0xFF}, 
+        UIALLIGMENT_TOPLEFT, (HeroInt2){100,180}, (HeroInt2){200,30});
+    widget->labels[5] = uiLabelCreate("Quit", font, (HeroColor){0xFF,0x00,0x00,0xFF}, 
+        UIALLIGMENT_TOPLEFT, (HeroInt2){101,179}, (HeroInt2){200,30});
+    widget->labels[5]->visible = false;
+
+    // menu->uiEvents[2] = exitClick;
 }
 
-void widgetConstructPlayMenu(GameMenu* menu)
+void widgetMenuLevelsConstruct(Menu* menu, HeroFont* font)
 {
-  menu->widgets[1] = uiWidgetCreate();
-  UIWidget* widget = menu->widgets[1];
-
-  uiWidgetButtonsNumber(widget, 5);
-  widget->buttons[0] = uiButtonCreate(menu->textures[2], (HeroInt2){447,50},(HeroInt2){386,64});
-  uiButtonSetClickFunc(widget->buttons[0], backToMenuClick, menu);
-
-  HeroFont* font = heroFontLoad("assets/fonts/arial.ttf", 32);
-
-  uiWidgetLabelsNumber(widget, 4);
-
-  int y = 150;
-  for(int i = 0; i < 4; i++)
-  {
-    widget->buttons[i+1] = uiButtonCreate(menu->textures[4], (HeroInt2){447,y},(HeroInt2){386,64});
-    uiButtonSetClickFunc(widget->buttons[i+1], gameClick, menu->levelsPaths[i]);
-
-    char* name = gameFileGetName(menu->levelsPaths[i]);
-    widget->labels[i] = uiLabelCreate(name, font, (HeroColor){255,255,255,255},
-      UIALLIGMENT_CENTER, (HeroInt2){447,y},(HeroInt2){386,64});
-    free(name);
-    y+= 84;
-  }
-
-  heroFontUnload(font);
+    menu->stateWidgets[1] = uiWidgetCreate();
 }
 
-void playClick(void* arg)
+void widgetMenuSettingsConstruct(Menu* menu, HeroFont* font)
 {
-  gameChangeState((GameMenu*)arg, MENUSTATE_LEVELS);
+    menu->stateWidgets[2] = uiWidgetCreate();
 }
 
-void quitClick(void* arg)
+void optionSwitch(Menu* menu)
 {
-  heroCoreClose((HeroCore*)arg);
+    if(heroInputKeyDown(menu->input, HERO_KEYCODE_DOWN))
+    {
+        menu->stateWidgets[menu->currentState]->labels[2*menu->activeOptionIndex + 1]->visible = false;
+        menu->activeOptionIndex++;
+        menu->activeOptionIndex %= optionsCount[menu->currentState];
+        menu->stateWidgets[menu->currentState]->labels[2*menu->activeOptionIndex + 1]->visible = true;
+        menuDraw(menu);
+    }
+    else if(heroInputKeyDown(menu->input, HERO_KEYCODE_UP))
+    {
+        menu->stateWidgets[menu->currentState]->labels[2*menu->activeOptionIndex + 1]->visible = false;
+        menu->activeOptionIndex--;
+        if(menu->activeOptionIndex < 0)
+            menu->activeOptionIndex = optionsCount[menu->currentState] - 1;
+        menu->stateWidgets[menu->currentState]->labels[2*menu->activeOptionIndex + 1]->visible = true;
+        menuDraw(menu);
+    }
 }
 
-void backToMenuClick(void* arg)
+void optionClick(Menu* menu)
 {
-  gameChangeState((GameMenu*)arg, MENUSTATE_MAIN);
+    if(heroInputKeyDown(menu->input, HERO_KEYCODE_RETURN))
+    {
+        // menu->uiEvents[menu->activeOptionIndex](NULL);
+    }
 }
 
-void gameClick(void* arg)
+void exitClick(void* arg)
 {
-  GameState* state = heroCoreModuleGet(core, "state");
-  gameStateChange(state, GAMESTATE_PLAY);
-
-  char* path = strdup((char*)arg);
-  GameSharedDataSystem* sharedata = heroCoreModuleGet(core, "data");
-  gameSharedDataAdd(sharedata, "level", path, NULL);
+    heroCoreClose(core);
 }

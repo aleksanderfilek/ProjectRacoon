@@ -3,12 +3,13 @@
 
 #include"Game/menu.h"
 
-void widgetConstructMainMenu(GameMenu* menu);
-void widgetConstructPlayMenu(GameMenu* menu);
+void widgetMenuMainConstruct(Menu* menu, HeroFont* font);
+void widgetMenuLevelsConstruct(Menu* menu, HeroFont* font);
+void widgetMenuSettingsConstruct(Menu* menu, HeroFont* font);
 
-void playClick();
-void quitClick();
-void backToMenuClick();
-void gameClick();
+void optionSwitch(Menu* menu);
+void optionClick(Menu* menu);
+
+void exitClick(void* arg);
 
 #endif

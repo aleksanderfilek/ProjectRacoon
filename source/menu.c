@@ -1,122 +1,92 @@
 #include"Game/menu.h"
-#include"Game/state.h"
-#include"Game/file.h"
 #include"Game/sharedata.h"
-
+#include"Game/standard.h"
 #include"Game/menuWidget.h"
-
-#include<stdlib.h>
-#include<stdio.h>
 
 extern HeroCore* core;
 
-static void update(GameMenu* menu);
-static void draw(GameMenu* menu);
-
-void* gameMenuInit()
+void* menuInit()
 {
-  GameMenu* menu = (GameMenu*)malloc(sizeof(GameMenu));
+    Menu* menu = allocate(Menu, 1);
+    memset(menu, 0, sizeof(menu));
 
-  HeroWindow* window = heroCoreModuleGet(core, "window");
-  menu->sdlWindow = heroWindowGetSdlWindow(window);
-  menu->input = heroCoreModuleGet(core, "input");
+    menu->window = heroCoreModuleGet(core, "window");
+    heroWindowSetBackgroundColor(menu->window, (HeroColor){0x00,0x00,0x00,0xFF});
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  heroWindowSetCurrentContext(window);
+    menu->input = heroCoreModuleGet(core, "input");
 
-  menu->shader = heroShaderLoad("assets/shaders/shader.vert","assets/shaders/shader.frag");
+    GameSharedDataSystem* data = heroCoreModuleGet(core, "data");
 
-  menu->spriteBatch = heroSpriteBatchInit(window, 10, 10, menu->shader);
-  
-  menu->texturesNumber = 5;
-  menu->textures = (HeroTexture**)malloc(menu->texturesNumber * sizeof(HeroTexture*));
-  menu->textures[0] = heroTextureLoad("assets/sprites/playBtn.png", 0);
-  menu->textures[1] = heroTextureLoad("assets/sprites/quitBtn.png", 0);
-  menu->textures[2] = heroTextureLoad("assets/sprites/backBtn.png", 0);
-  menu->textures[3] = heroTextureLoad("assets/sprites/background.png", 0);
-  menu->textures[4] = heroTextureLoad("assets/sprites/levelBtn.png", 0);
+    HeroShader* shader = gameSharedDataGet(data, "shader");
+    // if shader not esists create one and add to system
+    if(!shader)
+    {
+        shader = heroShaderLoad("assets/shaders/shader.vert", "assets/shaders/shader.frag");
+        gameSharedDataAdd(data, "shader", shader, heroShaderUnload);
+    }
 
+    menu->spriteBatch = heroSpriteBatchInit(menu->window, 32, 32, shader);
 
-  menu->levelsPaths = gameFileGetInDirectory("assets/levels", &menu->levelsNumber);
+    // if levels not esists load and add to system
+    Levels* levels = gameSharedDataGet(data, "level");
+    if(!levels)
+    {
+        gameSharedDataAdd(data, "level", NULL, NULL);
+    }
 
-  widgetConstructMainMenu(menu);
-  widgetConstructPlayMenu(menu);
+    // if font not esists load and add to system
+    HeroFont* font = gameSharedDataGet(data, "font");
+    if(!font)
+    {
+        font = heroFontLoad("assets/fonts/arial.ttf", 28);
+        gameSharedDataAdd(data, "font", font, heroFontUnload);
+    }
 
-  gameChangeState(menu, MENUSTATE_MAIN);
+    // construct widgets
+    widgetMenuMainConstruct(menu, font);
+    widgetMenuLevelsConstruct(menu, font);
+    widgetMenuSettingsConstruct(menu, font);
+    menu->currentState = MENUSTATE_MAIN;
+    menu->stateWidgets[0]->visible = true;
+    menu->activeOptionIndex = 0;
 
-  glClearColor(1.0f,1.0f,1.0f,1.0f);
+    // first menu draw
+    menuDraw(menu);
 
-  glEnable( GL_BLEND );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-  return menu;
+    return menu;
 }
 
-void gameMenuUpdate(void* ptr)
+void menuUpdate(void* ptr)
 {
-  GameMenu* menu = (GameMenu*)ptr;
+    Menu* menu = (Menu*)ptr;
 
-  update(menu);
-
-  draw(menu);
-
-  DEBUG_CODE(
-    if(heroInputKeyPressed(menu->input, HERO_KEYCODE_LCTRL) && 
-      heroInputKeyPressed(menu->input, HERO_KEYCODE_L)){
-        GameState* state = heroCoreModuleGet(core, "state");
-        gameStateChange(state, GAMESTATE_LEVELEDITOR);
-      }
-  )
+    // handle widget events
+    optionSwitch(menu);
+    optionClick(menu);
 }
 
-void gameMenuDestroy(void* ptr)
+void menuDestroy(void* ptr)
 {
-  GameMenu* menu = (GameMenu*)ptr;
+    Menu* menu = (Menu*)ptr;
 
-  char** levelsItr = menu->levelsPaths;
-  while(*levelsItr)
-  {
-    free(*levelsItr);
-    levelsItr++;
-  }
-  free(menu->levelsPaths);
+    // free wdigets
+    for(int i = 0; i < MENUSTATE_COUNT; i++)
+    {
+        uiWidgetDestroy(menu->stateWidgets[i]);
+    }
 
-  for(int i=0; i < menu->texturesNumber; i++)
-  {
-    heroTextureUnload(menu->textures[i]);
-  }
-
-  for(int i=0; i < 2; i++)
-  {
-    uiWidgetDestroy(menu->widgets[i]);
-  }
-
-  heroShaderUnload(menu->shader);
-
-  heroSpriteBatchDestroy(menu->spriteBatch);
-  
-  free(menu->textures);
-  free(menu);
+    free(menu);
 }
 
-static void update(GameMenu* menu)
+void menuDraw(Menu* menu)
 {
-  uiWidgetUpdate(menu->currentWidget, menu->input);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-}
+    heroSpriteBatchBegin(menu->spriteBatch);
+    uiWidgetDraw(menu->stateWidgets[menu->currentState], menu->spriteBatch);
+    heroSpriteBatchEnd(menu->spriteBatch);
 
-static void draw(GameMenu* menu)
-{
-  glClear(GL_COLOR_BUFFER_BIT);
-
-  heroSpriteBatchBegin(menu->spriteBatch);
-  uiWidgetDraw(menu->currentWidget, menu->spriteBatch);
-  heroSpriteBatchEnd(menu->spriteBatch);
-  
-  SDL_GL_SwapWindow(menu->sdlWindow);
-}
-
-void gameChangeState(GameMenu* menu, MenuState state)
-{
-  menu->uiState = state;
-  menu->currentWidget =  menu->widgets[(int)state];
+    heroWindowRender(menu->window);
 }

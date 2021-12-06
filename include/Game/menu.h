@@ -4,41 +4,32 @@
 #include"Hero/Hero.h"
 
 #include"Game/ui.h"
-#include"Game/play.h"
+#include"Game/levels.h"
 
-#include<stdint.h>
-
-typedef enum
+typedef enum MenuState
 {
   MENUSTATE_MAIN = 0,
-  MENUSTATE_LEVELS = 1,
-  MENUSTATE_COUNT = 2
+  MENUSTATE_LEVELS,
+  MENUSTATE_SETTINGS,
+  MENUSTATE_COUNT
 } MenuState;
 
-typedef struct
+typedef struct Menu
 {
-  SDL_Window* sdlWindow;
+  HeroWindow* window;
   HeroInput* input;
 
   HeroSpriteBatch* spriteBatch;
 
-  // assets
-  HeroTexture** textures;
-  uint32_t texturesNumber;
-  HeroShader* shader;
+  MenuState currentState;
+  UIWidget* stateWidgets[MENUSTATE_COUNT];
+  int activeOptionIndex;
 
-  MenuState uiState;
-  UIWidget* currentWidget;
-  UIWidget* widgets[2];
+} Menu;
 
-  // levels
-  char** levelsPaths;
-  uint32_t levelsNumber;
-} GameMenu;
-
-void* gameMenuInit();
-void gameMenuUpdate(void* ptr);
-void gameMenuDestroy(void* ptr);
-void gameChangeState(GameMenu* menu, MenuState state);
+void* menuInit();
+void menuUpdate(void* ptr);
+void menuDestroy(void* ptr);
+void menuDraw(Menu* menu);
 
 #endif
